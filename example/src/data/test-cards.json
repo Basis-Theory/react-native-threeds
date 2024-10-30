@@ -1,0 +1,66 @@
+[
+  {
+    "cardNumber": "4200000000000002",
+    "title": "Successful Frictionless Authentication"
+  },
+  {
+    "cardNumber": "4200000000000003",
+    "title": "Authentication Attempted"
+  },
+  {
+    "cardNumber": "4200000000000005",
+    "title": "Authentication Failed"
+  },
+  {
+    "cardNumber": "4200000000000006",
+    "title": "Authentication Unavailable"
+  },
+  {
+    "cardNumber": "4200000000000007",
+    "title": "Authentication Rejected"
+  },
+  {
+    "cardNumber": "4200000000000004",
+    "title": "Successful Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000014",
+    "title": "Successful Challenge Authentication - Method not Required"
+  },
+  {
+    "cardNumber": "4200000000000015",
+    "title": "Successful Mandated Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000016",
+    "title": "Successful Out-of-Band Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000008",
+    "title": "Attempted Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000009",
+    "title": "Failed Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000017",
+    "title": "Failed Out of Band Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000010",
+    "title": "Unavailable Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000011",
+    "title": "Rejected Challenge Authentication"
+  },
+  {
+    "cardNumber": "4200000000000012",
+    "title": "3DS Directory Server Error"
+  },
+  {
+    "cardNumber": "4200000000000013",
+    "title": "Internal 3DS Server Error"
+  }
+]

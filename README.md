@@ -11,13 +11,7 @@ npm install 3ds-react-native
 ## Usage
 
 
-```js
-import { multiply } from '3ds-react-native';
-
-// ...
-
-const result = await multiply(3, 7);
-```
+TODO
 
 
 ## Contributing

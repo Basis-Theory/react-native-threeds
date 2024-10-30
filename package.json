@@ -1,5 +1,5 @@
 {
-  "name": "3ds-react-native",
+  "name": "@basis-theory/3ds-react-native",
   "version": "0.0.0",
   "author": "Basis Theory <support@basistheory.com> (https://basistheory.com)",
   "license": "Apache-2.0",
@@ -42,7 +42,7 @@
     "example": "yarn workspace 3ds-react-native-example",
     "test": "jest",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint": "eslint --quiet",
     "clean": "del-cli lib",
     "prepare": "bob build",
     "release": "release-it"
@@ -70,6 +70,7 @@
     "@release-it/conventional-changelog": "^5.0.0",
     "@types/jest": "^29.5.5",
     "@types/react": "^18.2.44",
+    "@types/uuid": "^10.0.0",
     "commitlint": "^17.0.2",
     "del-cli": "^5.1.0",
     "eslint": "^9.13.0",
@@ -80,6 +81,7 @@
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-builder-bob": "^0.30.2",
+    "react-native-webview": "^13.12.3",
     "release-it": "^15.0.0",
     "typescript": "^5.2.2"
   },
@@ -88,7 +90,8 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-webview": "*"
   },
   "workspaces": [
     "example"
@@ -123,38 +126,6 @@
       }
     }
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@react-native",
-      "prettier"
-    ],
-    "rules": {
-      "react/react-in-jsx-scope": "off",
-      "prettier/prettier": [
-        "error",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "node_modules/",
-    "lib/",
-    "example/"
-  ],
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false
-  },
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
@@ -183,5 +154,9 @@
   "create-react-native-library": {
     "type": "library",
     "version": "0.42.0"
+  },
+  "dependencies": {
+    "react-native-get-random-values": "^1.11.0",
+    "uuid": "^10.0.0"
   }
 }

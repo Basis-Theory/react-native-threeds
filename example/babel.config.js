@@ -10,6 +10,7 @@ module.exports = function (api) {
   return getConfig(
     {
       presets: ['babel-preset-expo'],
+      plugins: ['module:react-native-dotenv']
     },
     { root, pkg }
   );
