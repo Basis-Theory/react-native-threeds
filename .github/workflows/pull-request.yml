@@ -2,11 +2,12 @@ name: Pull Request
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, release]
 
 jobs:
   verify:
     runs-on: ${{ matrix.os }}
+    environment: PR
     strategy:
       matrix:
         node: ['20.x']
@@ -16,7 +17,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPM_RO_TOKEN }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v1
@@ -30,3 +31,5 @@ jobs:
 
       - name: Verify
         run: make verify
+        env:
+          SKIP_INSTALL: 1 # install with cache was done already
