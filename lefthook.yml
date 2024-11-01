@@ -3,7 +3,7 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,ts,jsx,tsx}"
-      run: npx eslint {staged_files} --warn-ignored
+      run: npx eslint {staged_files} --no-warn-ignored
     types:
       glob: "*.{js,ts, jsx, tsx}"
       run: npx tsc

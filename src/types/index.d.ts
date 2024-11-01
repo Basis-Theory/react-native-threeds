@@ -16,8 +16,4 @@ interface ChallengeResult {
   id: string;
 }
 
-export type {
-  ThreeDSSession,
-  Challenge,
-  ChallengeResult,
-}
+export type { ThreeDSSession, Challenge, ChallengeResult };

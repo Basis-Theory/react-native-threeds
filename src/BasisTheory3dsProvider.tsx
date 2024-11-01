@@ -1,17 +1,21 @@
-import React, {createContext, useRef, useState} from 'react';
-import {WebView, type WebViewMessageEvent} from 'react-native-webview';
-import {View, StyleSheet} from 'react-native';
-import {v4 as uuid} from 'uuid';
+import React, { createContext, useRef, useState } from 'react';
+import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import { View, StyleSheet } from 'react-native';
+import { v4 as uuid } from 'uuid';
 import type {
   CompleteChallengeMessage,
   CreateSessionMessage,
   ErrorMessage,
+  WebViewMessage,
 } from './types/messages';
-import type {Challenge, ThreeDSSession} from './types';
+import type { Challenge, ThreeDSSession } from './types';
 
 interface PendingPromise {
+  // just a generic promise, don't need to adhere to types
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   resolve: (value: any) => void;
   reject: (reason?: any) => void;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 interface BasisTheory3dsContextProps {
@@ -91,11 +95,16 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
   };
 
   const onMessage = (event: WebViewMessageEvent) => {
-    const data = JSON.parse(event.nativeEvent.data);
-    const {type, promiseId} = data;
+    const data: WebViewMessage = JSON.parse(event.nativeEvent.data);
+    const { type, promiseId } = data;
+
+    if (!promiseId) {
+      // discard messages that are not trying to resolve a pending promise
+      return;
+    }
 
     if (pendingPromises.has(promiseId)) {
-      const {resolve, reject} = pendingPromises.get(promiseId)!;
+      const { resolve, reject } = pendingPromises.get(promiseId)!;
 
       if ('error' in data) {
         setWebViewVisible(false);
@@ -167,7 +176,7 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
       }
 
       const promiseId = uuid();
-      pendingPromises.set(promiseId, {resolve, reject});
+      pendingPromises.set(promiseId, { resolve, reject });
 
       const startChallengeJs = `
         (function () {
@@ -208,26 +217,30 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
   };
 
   return (
-    <BasisTheory3dsContext.Provider value={{createSession, startChallenge}}>
+    <BasisTheory3dsContext.Provider value={{ createSession, startChallenge }}>
       {children}
       <View
-        style={webViewVisible ? styles.webViewContainer : styles.hiddenWebView}>
+        style={webViewVisible ? styles.webViewContainer : styles.hiddenWebView}
+      >
         <WebView
+          testID='basis-theory-3ds-webview'
           ref={webViewRef}
           originWhitelist={['https://*']}
           onMessage={onMessage}
           javaScriptEnabled={true}
-          onError={error => console.error(error)}
+          onError={(error) => console.error(error)}
           onLoad={() => webViewRef.current?.injectJavaScript(initJavascript)}
           mixedContentMode="never"
           contentMode="mobile"
           style={styles.webView}
-          source={{html: '<html></html>'}}
+          source={{ html: '<html></html>' }}
         />
       </View>
     </BasisTheory3dsContext.Provider>
   );
 };
+
+const bgColor = '#fff';
 
 const styles = StyleSheet.create({
   webViewContainer: {
@@ -236,7 +249,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#fff',
+    backgroundColor: bgColor,
     zIndex: 1000,
   },
   hiddenWebView: {

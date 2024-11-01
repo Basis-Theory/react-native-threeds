@@ -8,10 +8,10 @@
     "allowUnusedLabels": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx",
-    "lib": ["ESNext"],
+    "jsx": "react",
+    "lib": ["ESNext", "DOM"],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
@@ -24,6 +24,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "verbatimModuleSyntax": true
-  }
+    "verbatimModuleSyntax": false,
+    "importHelpers": true,
+  },
+  "include": ["src"],
 }

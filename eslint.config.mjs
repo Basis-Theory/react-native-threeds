@@ -1,36 +1,58 @@
-import reactNativeConfig from '@react-native/eslint-config';
-import prettierConfig from 'eslint-config-prettier';
+import { fixupPluginRules } from '@eslint/compat';
+import js from '@eslint/js';
+import eslintReactNative from 'eslint-plugin-react-native';
+import typescriptEslint from 'typescript-eslint';
 import prettierPlugin from 'eslint-plugin-prettier';
 
-export default [
+export default typescriptEslint.config(
   {
     files: ['*.js', '*.jsx', '*.ts', '*.tsx'],
   },
   {
-    ignores: ['.yarn/*', 'lib/*', 'node_modules/*', 'example/*'],
+    ignores: [
+      '.yarn/*',
+      'dist/*',
+      'node_modules/*',
+      'example/*',
+      'jest.config.js',
+      'eslint.config.mjs',
+      'babel.config.js',
+      'prepare.js'
+    ],
   },
+  js.configs.recommended,
+  ...typescriptEslint.configs.recommendedTypeChecked,
   {
     rules: {
-      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslin/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+    },
+  },
+  // react-native
+  {
+    name: 'eslint-plugin-react-native',
+    plugins: {
+      'react-native': fixupPluginRules({
+        rules: eslintReactNative.rules,
+      }),
+    },
+    rules: {
+      ...eslintReactNative.configs.all.rules,
+      'react-native/sort-styles': 'off',
+      'react-native/no-inline-styles': 'warn',
     },
   },
   {
-    rules: {
-      'prettier/prettier': [
-        'error',
-        {
-          arrowParens: 'avoid',
-          quoteProps: 'consistent',
-          singleQuote: true,
-          trailingComma: 'all',
-          tabWidth: 2,
-          bracketSameLine: true,
-          bracketSpacing: false,
-        },
-      ],
-    },
     plugins: {
       prettier: prettierPlugin,
     },
   },
-];
+  {
+    languageOptions: {
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+        project: './tsconfig.json',
+      },
+    },
+  }
+);

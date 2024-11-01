@@ -1,0 +1,11 @@
+node_modules
+dist
+example
+coverage
+.github
+.yarn
+CHANGELOG.md
+**/.git
+**/.svn
+**/.hg
+**/node_modules
