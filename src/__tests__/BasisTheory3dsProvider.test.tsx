@@ -59,7 +59,7 @@ test('createSession calls injectJavaScript on WebView', () => {
     ),
   });
 
-  void result.current.createSession('token-id');
+  void result.current.createSession({ tokenId: 'token-id' });
 
   expect(refOverride.injectJavaScript).toHaveBeenCalled();
 });
@@ -72,7 +72,7 @@ test('createSession resolves with session data', async () => {
     const context = useBasisTheory3ds();
     if (!context) throw new Error('No context found');
 
-    createSessionPromise = context.createSession('token-id');
+    createSessionPromise = context.createSession({ tokenId: 'token-id' });
     return <Text>Test Child</Text>;
   };
 

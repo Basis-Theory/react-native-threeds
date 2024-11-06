@@ -8,7 +8,11 @@ import type {
   ErrorMessage,
   WebViewMessage,
 } from './types/messages';
-import type { Challenge, ThreeDSSession } from './types';
+import type {
+  Challenge,
+  CreateThreeDSSessionRequest,
+  ThreeDSSession,
+} from './types';
 
 interface PendingPromise {
   // just a generic promise, don't need to adhere to types
@@ -19,7 +23,7 @@ interface PendingPromise {
 }
 
 interface BasisTheory3dsContextProps {
-  createSession: (tokenId: string) => Promise<ThreeDSSession>;
+  createSession: (req: CreateThreeDSSessionRequest) => Promise<ThreeDSSession>;
   startChallenge: (challenge: Challenge) => Promise<boolean>;
 }
 
@@ -130,22 +134,53 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
     }
   };
 
-  const createSession = (tokenId: string) => {
+  const createSession = ({
+    tokenId,
+    tokenIntentId,
+    pan,
+  }: CreateThreeDSSessionRequest) => {
     return new Promise<ThreeDSSession>((resolve, reject) => {
-      if (!tokenId) {
-        reject(new Error('A token ID is required to create a session.'));
+      const params = { tokenId, tokenIntentId, pan };
+
+      const providedParam = Object.entries(params).find(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([_, value]) => value != null
+      ) as [string, string] | undefined;
+
+      if (!providedParam) {
+        reject(
+          new Error(
+            'A tokenId, tokenIntentId, or pan is required to create a session.'
+          )
+        );
         return;
       }
 
+      const additionalParamExists = Object.entries(params).some(
+        ([key, value]) => value != null && key !== providedParam[0]
+      );
+
+      if (additionalParamExists) {
+        reject(
+          new Error(
+            'Only one of tokenId, tokenIntentId, or pan should be provided.'
+          )
+        );
+        return;
+      }
+
+      const [paramName, paramValue] = providedParam;
+      const paramObjectString = JSON.stringify({ [paramName]: paramValue });
+
       const promiseId = uuid();
-      pendingPromises.set(promiseId, {resolve, reject});
+      pendingPromises.set(promiseId, { resolve, reject });
 
       const createSessionJs = `
         (function () {
           if (window.bt3ds) {
             try {
               const session = bt3ds
-                .createSession({ pan: ${JSON.stringify(tokenId)} })
+                .createSession(${paramObjectString})
                 .then(function (session) {
                   window.ReactNativeWebView.postMessage(JSON.stringify({type: "createSession", promiseId: "${promiseId}", session: session }));
                 })
@@ -223,7 +258,7 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
         style={webViewVisible ? styles.webViewContainer : styles.hiddenWebView}
       >
         <WebView
-          testID='basis-theory-3ds-webview'
+          testID="basis-theory-3ds-webview"
           ref={webViewRef}
           originWhitelist={['https://*']}
           onMessage={onMessage}

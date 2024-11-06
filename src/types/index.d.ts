@@ -16,4 +16,13 @@ interface ChallengeResult {
   id: string;
 }
 
-export type { ThreeDSSession, Challenge, ChallengeResult };
+interface CreateThreeDSSessionRequest {
+  tokenId?: string;
+  tokenIntentId?: string;
+  /**
+   * @deprecated Use `tokenId` instead
+   */
+  pan?: string;
+}
+
+export type { ThreeDSSession, Challenge, ChallengeResult, CreateThreeDSSessionRequest };

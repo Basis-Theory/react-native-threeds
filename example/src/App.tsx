@@ -53,7 +53,7 @@ const MainScreen: React.FC = () => {
           });
 
           // Create a 3DS Session
-          createSession(token.id)
+          createSession({ tokenId: token.id })
             .then((session: ThreeDSSession) => {
               Toast.show({
                 type: 'success',
