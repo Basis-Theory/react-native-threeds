@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Basis-Theory/threeds-react-native/compare/v1.0.0...v1.1.0) (2024-11-06)
+
+
+### Features
+
+* support new create session params ([#6](https://github.com/Basis-Theory/threeds-react-native/issues/6)) ([0158901](https://github.com/Basis-Theory/threeds-react-native/commit/0158901741630c53044b2b64ed7e13df25065551))
+
 # 1.0.0 (2024-11-01)
 
 
