@@ -4,6 +4,10 @@ const distPackage = require('./package.json');
 // remove dev dependencies
 delete distPackage.devDependencies;
 
+libPackage.scripts = {
+  postversion: 'cd .. && node bump.js',
+};
+
 // include all 'dist/*' files
 distPackage.files = ['*'];
 
