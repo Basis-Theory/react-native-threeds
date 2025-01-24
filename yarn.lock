@@ -1747,9 +1747,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@basis-theory/3ds-react-native@workspace:.":
+"@basis-theory/react-native-threeds@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@basis-theory/3ds-react-native@workspace:."
+  resolution: "@basis-theory/react-native-threeds@workspace:."
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@eslint/compat": ^1.2.2
