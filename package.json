@@ -1,6 +1,6 @@
 {
   "name": "@basis-theory/react-native-threeds",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Basis Theory 3DS React Native SDK",
   "author": "Basis Theory <support@basistheory.com> (https://basistheory.com)",
   "license": "Apache-2.0",
