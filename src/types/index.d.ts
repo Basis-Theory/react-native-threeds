@@ -1,6 +1,7 @@
 interface ThreeDSSession {
   id: string;
   cardBrand?: string;
+  additionalCardBrands?: string[];
 }
 
 interface Challenge {
@@ -14,6 +15,8 @@ interface Challenge {
 
 interface ChallengeResult {
   id: string;
+  isCompleted?: boolean;
+  authenticationStatus?: string;
 }
 
 interface CreateThreeDSSessionRequest {
