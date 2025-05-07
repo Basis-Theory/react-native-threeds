@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Basis-Theory/react-native-threeds/compare/v1.0.0...v1.1.0) (2025-05-07)
+
+
+### Features
+
+* add additional card brands prop ([#6](https://github.com/Basis-Theory/react-native-threeds/issues/6)) ([d575cb2](https://github.com/Basis-Theory/react-native-threeds/commit/d575cb2870ce3b6de8296d50701ec411772ccc5b))
+
 # 1.0.0 (2025-01-24)
 
 
