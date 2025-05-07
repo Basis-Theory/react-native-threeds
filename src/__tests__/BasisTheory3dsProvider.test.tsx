@@ -65,7 +65,11 @@ test('createSession calls injectJavaScript on WebView', () => {
 });
 
 test('createSession resolves with session data', async () => {
-  const sessionData = { id: 'session-id', cardBrand: 'ravelin' };
+  const sessionData = {
+    id: 'session-id',
+    cardBrand: 'Visa',
+    additionalCardBrands: ['Visa', 'Cartes Bancaires']
+  };
   let createSessionPromise: Promise<ThreeDSSession> | undefined;
 
   const TestComponent = () => {
