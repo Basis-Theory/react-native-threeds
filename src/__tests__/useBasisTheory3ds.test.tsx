@@ -4,22 +4,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { BasisTheory3dsProvider, useBasisTheory3ds } from '../index';
 import { View } from 'react-native';
 
-jest.mock('uuid', () => ({
+jest.mock('../utils/uuid', () => ({
   v4: () => 'test-uuid',
 }));
-
-const refOverride = {
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  reload: jest.fn(),
-  stopLoading: jest.fn(),
-  injectJavaScript: jest.fn(),
-  requestFocus: jest.fn(),
-  postMessage: jest.fn(),
-  clearFormData: jest.fn(),
-  clearCache: jest.fn(),
-  clearHistory: jest.fn(),
-};
 
 jest.mock('react-native-webview', () => {
   // just mocking component, don't need to adhere to types
@@ -37,6 +24,18 @@ jest.mock('react-native-webview', () => {
   };
 });
 
+const refOverride = {
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  reload: jest.fn(),
+  stopLoading: jest.fn(),
+  injectJavaScript: jest.fn(),
+  requestFocus: jest.fn(),
+  postMessage: jest.fn(),
+  clearFormData: jest.fn(),
+  clearCache: jest.fn(),
+  clearHistory: jest.fn(),
+};
 
 test('throws error when used outside of BasisTheory3dsProvider', () => {
   const { result } = renderHook(() => useBasisTheory3ds());

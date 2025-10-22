@@ -1,5 +1,4 @@
 import { useContext } from 'react';
-import 'react-native-get-random-values';
 import { BasisTheory3dsContext } from './BasisTheory3dsProvider';
 
 export const useBasisTheory3ds = () => {

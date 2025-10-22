@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@basis-theory/3ds-react-native": ["./src/index"]
+      "@basis-theory/react-native-threeds": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

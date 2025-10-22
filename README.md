@@ -1,6 +1,6 @@
 # 3DS React Native SDK
 
-[![Version](https://img.shields.io/npm/v/@basis-theory/3ds-react-native.svg)](https://www.npmjs.org/package/@basis-theory/3ds-react-native)
+[![Version](https://img.shields.io/npm/v/@basis-theory/react-native-threeds.svg)](https://www.npmjs.org/package/@basis-theory/react-native-threeds)
 
 The [Basis Theory](https://basistheory.com) 3DS React Native SDK.
 
@@ -9,13 +9,13 @@ The [Basis Theory](https://basistheory.com) 3DS React Native SDK.
 Using [Node Package Manager](https://docs.npmjs.com/)
 
 ```sh
-npm install @basis-theory/3ds-react-native
+npm install @basis-theory/react-native-threeds
 ```
 
 Using [Yarn](https://classic.yarnpkg.com/en/docs/)
 
 ```sh
-yarn add @basis-theory/3ds-react-native
+yarn add @basis-theory/react-native-threeds
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ yarn add @basis-theory/3ds-react-native
 To use the React Native SDK methods, you need to wrap your app with the `BasisTheory3dsProvider` component. This component will provide the SDK methods to the rest of your app.
 
 ```jsx
-import { BasisTheoryProvider } from '@basis-theory/3ds-react-native';
+import { BasisTheoryProvider } from '@basis-theory/react-native-threeds';
 
 const App = () => {
   return (
@@ -37,7 +37,7 @@ const App = () => {
 After that, you can access the SDK methods using the `useBasisTheory3ds` hook.
 
 ```jsx
-import { BasisTheory3dsProvider, useBasisTheory3ds } from '3ds-react-native';
+import { BasisTheory3dsProvider, useBasisTheory3ds } from '@basis-theory/react-native-threeds';
 
 const App = () => {
   const { createSession, startChallenge } = useBasisTheory3ds();
