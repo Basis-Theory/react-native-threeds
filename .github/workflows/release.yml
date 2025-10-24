@@ -1,22 +1,25 @@
 name: Release
 
 on:
-  push:
-    branches: [master, release]
+  release:
+    types: [released]
 
 jobs:
   build-release:
     runs-on: ${{ matrix.os }}
-    environment: PROD
+    permissions:
+      id-token: write # Required for OIDC trusted publishing to npm
+      contents: read
+      actions: read
+    environment: PROD # Must match npm trusted publisher config exactly (case-sensitive)
     strategy:
       matrix:
-        node: ['20.x']
+        node: ["20.x"]
         os: [ubuntu-latest]
     env:
       CI: 1
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
-      - name: Checkout repo
+      - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_SEMANTIC_RELEASE_PAT }}
@@ -28,24 +31,27 @@ jobs:
           channel: ${{ vars.SLACK_DUCKBOT_RELEASE_CHANNEL_ID }}
 
       - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+          # registry-url is intentionally NOT set - it creates .npmrc that blocks OIDC
 
-      - name: Install deps (with cache)
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: yarn --immutable
+      - name: Update npm for Trusted Publishing
+        run: npm install -g npm@latest # Requires npm 11.5.1+ for OIDC support
+
+      - name: Install deps
+        run: yarn --immutable --no-progress --ignore-scripts
+
+      - name: Bump Version
+        run: make update-version NEW_VERSION=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
 
       - name: Build
         run: make build
         env:
           SKIP_INSTALL: 1 # install with cache was done already
 
-      - name: Release
-        run: make release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_SEMANTIC_RELEASE_PAT }}
+      - name: Publish Package to NPM
+        run: cd dist && npm publish --access public
 
       - name: Stop Deploy Message
         if: always()
@@ -53,4 +59,4 @@ jobs:
         with:
           slack-api-token: ${{ secrets.SLACK_DUCKBOT_API_KEY }}
           channel: ${{ vars.SLACK_DUCKBOT_RELEASE_CHANNEL_ID }}
-          status: 'done'
+          status: "done"

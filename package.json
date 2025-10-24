@@ -4,6 +4,10 @@
   "description": "Basis Theory 3DS React Native SDK",
   "author": "Basis Theory <support@basistheory.com> (https://basistheory.com)",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Basis-Theory/react-native-threeds"
+  },
   "workspaces": [
     "example"
   ],

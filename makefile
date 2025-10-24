@@ -8,3 +8,6 @@ build:
 
 release:
 	yarn release
+
+update-version:
+	./scripts/updateversion.sh
