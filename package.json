@@ -13,7 +13,7 @@
   ],
   "packageManager": "yarn@3.6.1",
   "scripts": {
-    "example": "yarn workspace 3ds-react-native-example",
+    "example": "yarn workspace react-native-threeds-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint --quiet",
@@ -55,10 +55,7 @@
     "!**/__mocks__",
     "!**/.*"
   ],
-  "dependencies": {
-    "react-native-get-random-values": "^1.11.0",
-    "uuid": "^10.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@eslint/compat": "^1.2.2",

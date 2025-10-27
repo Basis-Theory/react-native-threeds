@@ -1,7 +1,7 @@
 import React, { createContext, useRef, useState } from 'react';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { View, StyleSheet } from 'react-native';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from './utils/uuid';
 import type {
   CompleteChallengeMessage,
   CreateSessionMessage,

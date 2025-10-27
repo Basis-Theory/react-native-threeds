@@ -11,8 +11,8 @@ import {
 import {
   BasisTheory3dsProvider,
   useBasisTheory3ds,
-} from '@basis-theory/3ds-react-native';
-import type {ThreeDSSession} from '@basis-theory/3ds-react-native';
+} from '@basis-theory/react-native-threeds';
+import type {ThreeDSSession} from '@basis-theory/react-native-threeds';
 import Toast from 'react-native-toast-message';
 import {CardPicker} from './components/CardPicker';
 import {CardInput} from './components/CardInput';
