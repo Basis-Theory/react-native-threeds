@@ -39,8 +39,10 @@ jobs:
       - name: Update npm for Trusted Publishing
         run: npm install -g npm@latest # Requires npm 11.5.1+ for OIDC support
 
-      - name: Install deps
-        run: yarn --immutable --no-progress --ignore-scripts
+      - name: Install deps (with cache)
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn --immutable
 
       - name: Bump Version
         run: make update-version NEW_VERSION=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
