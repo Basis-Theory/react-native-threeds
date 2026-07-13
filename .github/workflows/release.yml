@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_SEMANTIC_RELEASE_PAT }}
 
       - name: Start Deploy Message
         uses: Basis-Theory/public-github-actions/deploy-slack-action@master
