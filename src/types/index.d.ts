@@ -11,6 +11,8 @@ interface Challenge {
   threeDSVersion: string;
   windowSize?: string;
   timeout?: number;
+  tenantId?: string;
+  tenantType?: string;
 }
 
 interface ChallengeResult {

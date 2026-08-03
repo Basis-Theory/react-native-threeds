@@ -223,7 +223,9 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
                 acsTransactionId: ${JSON.stringify(challenge.acsTransactionId)},
                 threeDSVersion: ${JSON.stringify(challenge.threeDSVersion)},
                 windowSize: ${JSON.stringify(challenge.windowSize)},
-                timeout: ${challenge.timeout}
+                timeout: ${challenge.timeout},
+                tenantId: ${JSON.stringify(challenge.tenantId)},
+                tenantType: ${JSON.stringify(challenge.tenantType)}
               };
 
               bt3ds
