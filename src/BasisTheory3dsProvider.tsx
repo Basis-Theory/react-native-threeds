@@ -2,6 +2,7 @@ import React, { createContext, useRef, useState } from 'react';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { View, StyleSheet } from 'react-native';
 import { v4 as uuid } from './utils/uuid';
+import { resolveApiBaseUrl } from './utils/urls';
 import type {
   CompleteChallengeMessage,
   CreateSessionMessage,
@@ -32,7 +33,10 @@ export const BasisTheory3dsContext =
 
 interface Props {
   apiKey: string;
+  /** Takes precedence over `region`. */
   apiBaseUrl?: string;
+  /** Selects a regional API host: `us` or `eu`. Optional. */
+  region?: string;
   scriptSrc?: string;
   children: React.ReactNode;
 }
@@ -40,9 +44,11 @@ interface Props {
 export const BasisTheory3dsProvider: React.FC<Props> = ({
   apiKey,
   children,
-  apiBaseUrl = 'https://api.basistheory.com',
+  apiBaseUrl,
+  region,
   scriptSrc = 'https://3ds.basistheory.com',
 }) => {
+  const resolvedApiBaseUrl = resolveApiBaseUrl({ apiBaseUrl, region });
   const webViewRef = useRef<WebView>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
   const [pendingPromises] = useState<Map<string, PendingPromise>>(new Map());
@@ -64,7 +70,7 @@ export const BasisTheory3dsProvider: React.FC<Props> = ({
 
         script.onload = async function () {
           window.bt3ds = BasisTheory3ds(${JSON.stringify(apiKey)}, {
-            apiBaseUrl: ${JSON.stringify(apiBaseUrl)},
+            apiBaseUrl: ${JSON.stringify(resolvedApiBaseUrl)},
           });
 
           const challengeFrameContainer = document.getElementById(
