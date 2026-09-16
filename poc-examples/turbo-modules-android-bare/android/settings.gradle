@@ -1,0 +1,27 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'BT3DSTurboBareAndroid'
+
+// The composite SDK exposes Ravelin's 3DS AAR transitively. Repositories for
+// application dependencies belong to this host, not only to the SDK build.
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+  repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://maven.ravelin.com/public/repositories/threeds2service/' }
+  }
+}
+
+// Use the checked-out Android SDK rather than publishing a POC artifact.
+includeBuild('../../../poc-support/.native-sdks/android-threeds-turbo-modules-rn081') {
+  dependencySubstitution {
+    substitute module('com.basistheory:android-threeds') using project(':lib')
+  }
+}
+
+include ':app'
+include ':basis-theory_react-native-threeds'
+project(':basis-theory_react-native-threeds').projectDir = new File(rootDir, '../../../android')
+includeBuild('../node_modules/@react-native/gradle-plugin')

@@ -1,0 +1,38 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "org.jetbrains.kotlin.plugin.serialization") {
+                useVersion("2.1.20")
+            }
+        }
+    }
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            setUrl("https://maven.ravelin.com/public/repositories/threeds2service/")
+        }
+    }
+}
+
+rootProject.name = "3ds-android"
+
+// The React Native POC substitutes only the SDK library dependency. Excluding
+// upstream's standalone Compose example keeps its unrelated build plugins out
+// of the composite build and leaves the library source unchanged.
+include ':lib'

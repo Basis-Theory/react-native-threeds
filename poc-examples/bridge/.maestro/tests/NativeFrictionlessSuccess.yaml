@@ -1,0 +1,17 @@
+appId: com.basistheory.poc.threeds.legacyarchitecture
+---
+- launchApp
+- extendedWaitUntil:
+    visible: 'Native 3DS ready'
+    timeout: 60000
+- tapOn:
+    id: 'card-number-input'
+- eraseText: 16
+- inputText: '4200000000000002'
+- hideKeyboard
+- tapOn:
+    id: 'checkout-button'
+- extendedWaitUntil:
+    visible: 'Native 3DS: successful'
+    timeout: 30000
+- stopApp

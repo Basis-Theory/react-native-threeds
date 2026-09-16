@@ -9,11 +9,15 @@
     "url": "https://github.com/Basis-Theory/react-native-threeds"
   },
   "workspaces": [
-    "example"
+    "poc-examples/*",
+    "poc-support/backend"
   ],
   "packageManager": "yarn@3.6.1",
   "scripts": {
-    "example": "yarn workspace react-native-threeds-example",
+    "poc:backend": "yarn workspace 3ds-authenticate start",
+    "poc:bridge": "yarn workspace bt-3ds-bridge-poc start",
+    "poc:turbo-modules": "yarn workspace bt-3ds-turbo-modules-poc start",
+    "poc:turbo-modules-android-bare": "yarn workspace bt-3ds-turbo-modules-android-bare-poc start",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint --quiet",
@@ -55,7 +59,19 @@
     "!**/__mocks__",
     "!**/.*"
   ],
-  "dependencies": {},
+  "codegenConfig": {
+    "name": "BasisTheoryThreeDSSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.basistheory.reactnativethreeds"
+    },
+    "ios": {
+      "modulesProvider": {
+        "NativeBasisTheoryThreeDS": "BasisTheoryThreeDSTurbo"
+      }
+    }
+  },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@eslint/compat": "^1.2.2",
@@ -89,7 +105,7 @@
     "prettier": "^3.3.3",
     "react": "18.2.0",
     "react-native": "0.74.5",
-    "react-native-builder-bob": "^0.30.2",
+    "react-native-builder-bob": "^0.43.1",
     "react-native-webview": "^13.12.3",
     "react-test-renderer": "^18.3.1",
     "semantic-release": "^24.2.0",
@@ -134,8 +150,7 @@
       [
         "typescript",
         {
-          "project": "tsconfig.build.json",
-          "esm": true
+          "project": "tsconfig.build.json"
         }
       ]
     ]

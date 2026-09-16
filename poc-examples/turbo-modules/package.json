@@ -1,0 +1,30 @@
+{
+  "name": "bt-3ds-turbo-modules-poc",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android --reset-cache",
+    "ios": "expo start --ios --reset-cache",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@basis-theory/react-native-threeds": "workspace:*",
+    "@expo/metro-runtime": "~57.0.15",
+    "@react-native-picker/picker": "2.11.4",
+    "expo": "~57.0.22",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-toast-message": "^2.2.1",
+    "react-native-web": "^0.21.2",
+    "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "react-native-builder-bob": "^0.43.1",
+    "react-native-dotenv": "^3.4.11"
+  },
+  "private": true
+}

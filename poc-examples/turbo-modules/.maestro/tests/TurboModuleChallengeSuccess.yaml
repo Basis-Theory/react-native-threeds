@@ -1,0 +1,25 @@
+appId: com.basistheory.poc.threeds.newarchitecture
+---
+- launchApp
+- extendedWaitUntil:
+    visible: '3DS TurboModule ready'
+    timeout: 60000
+- tapOn:
+    id: 'card-number-input'
+- eraseText: 16
+- inputText: '4200000000000004'
+- hideKeyboard
+- tapOn:
+    id: 'checkout-button'
+- extendedWaitUntil:
+    visible: 'Purchase authentication'
+    timeout: 30000
+- tapOn:
+    below: 'Enter your code below'
+- inputText: '1234'
+- tapOn: 'Purchase authentication'
+- tapOn: 'Submit'
+- extendedWaitUntil:
+    visible: 'TurboModule 3DS: successful'
+    timeout: 30000
+- stopApp
