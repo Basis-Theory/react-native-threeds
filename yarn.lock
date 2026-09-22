@@ -8573,6 +8573,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"bt-3ds-unified-poc@workspace:poc-examples/unified":
+  version: 0.0.0-use.local
+  resolution: "bt-3ds-unified-poc@workspace:poc-examples/unified"
+  dependencies:
+    "@babel/core": ^7.20.0
+    "@basis-theory/react-native-threeds": "workspace:*"
+    "@expo/metro-runtime": ~6.1.2
+    "@react-native-picker/picker": 2.11.1
+    expo: ~54.0.12
+    expo-status-bar: ~3.0.9
+    react: 19.1.0
+    react-dom: 19.1.0
+    react-native: 0.81.5
+    react-native-builder-bob: ^0.30.2
+    react-native-dotenv: ^3.4.11
+    react-native-toast-message: ^2.2.1
+    react-native-web: ~0.21.0
+    react-native-webview: 13.15.0
+  languageName: unknown
+  linkType: soft
+
 "buffer-from@npm:^1.0.0":
   version: 1.1.2
   resolution: "buffer-from@npm:1.1.2"

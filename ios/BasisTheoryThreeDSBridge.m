@@ -3,6 +3,10 @@
 // Swift classes are not discovered by the legacy React Native bridge on their
 // own. This Objective-C declaration exports the Swift selectors as Promise-based
 // JavaScript methods without adding business logic to the Objective-C layer.
+//
+// Only compiled in when RCT_NEW_ARCH_ENABLED != 1 — see
+// BasisTheoryReactNativeThreeDS.podspec and
+// docs/REGISTRATION-AND-PACKAGING.md.
 @interface RCT_EXTERN_MODULE(BasisTheoryThreeDS, NSObject)
 
 // Initializes the native SDK with public app configuration and the merchant's

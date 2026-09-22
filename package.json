@@ -18,6 +18,7 @@
     "poc:bridge": "yarn workspace bt-3ds-bridge-poc start",
     "poc:turbo-modules": "yarn workspace bt-3ds-turbo-modules-poc start",
     "poc:turbo-modules-android-bare": "yarn workspace bt-3ds-turbo-modules-android-bare-poc start",
+    "poc:unified": "yarn workspace bt-3ds-unified-poc start",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint --quiet",

@@ -22,6 +22,13 @@ interface NativeThreeDSModule {
   startAuthentication(sessionId: string): Promise<NativeThreeDSResult>;
 }
 
+// This is where legacy-bridge registration surfaces in JavaScript:
+// `NativeModules.BasisTheoryThreeDS` is only populated if
+// BasisTheoryThreeDSBridgePackage.kt (Android) or the RCT_EXTERN_MODULE
+// declaration in BasisTheoryThreeDSBridge.m (iOS) actually compiled into this
+// build. See docs/REGISTRATION-AND-PACKAGING.md for the full path from a
+// Kotlin/Swift class to this lookup.
+//
 // NativeModules is populated only in custom iOS and Android builds. Expo Go and
 // web leave this value undefined and continue using the WebView implementation.
 const nativeModule = NativeModules.BasisTheoryThreeDS as

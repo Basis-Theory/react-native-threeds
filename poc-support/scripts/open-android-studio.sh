@@ -15,8 +15,11 @@ case "${1:-}" in
   turbo-modules-android-bare|turbo-bare)
     application_directory="poc-examples/turbo-modules-android-bare/android"
     ;;
+  unified)
+    application_directory="poc-examples/unified/android"
+    ;;
   *)
-    echo "Usage: $0 bridge|turbo-modules|turbo-modules-android-bare" >&2
+    echo "Usage: $0 bridge|turbo-modules|turbo-modules-android-bare|unified" >&2
     exit 2
     ;;
 esac

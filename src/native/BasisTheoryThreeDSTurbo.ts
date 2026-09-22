@@ -21,11 +21,17 @@ type ReactNativeRuntimeGlobals = typeof globalThis & {
 };
 
 const getNativeBasisTheoryThreeDS = (): Spec | null => {
+  // This is where TurboModule registration surfaces in JavaScript. It only
+  // resolves if BasisTheoryThreeDSTurboPackage.kt (Android) or
+  // BasisTheoryThreeDSTurbo.mm (iOS) actually compiled into this build — see
+  // docs/REGISTRATION-AND-PACKAGING.md for the full path from a Kotlin/Swift
+  // class to this lookup.
+  //
   // Read the current proxy as well as Codegen's module result so this POC can
   // distinguish registration failures from a host that did not install JSI.
   const runtimeGlobals = globalThis as ReactNativeRuntimeGlobals;
   const turboModuleProxy = runtimeGlobals.__turboModuleProxy;
-  const legacyModule = NativeModules.NativeBasisTheoryThreeDS as
+  const legacyModule = NativeModules?.NativeBasisTheoryThreeDS as
     | Spec
     | null
     | undefined;
@@ -43,7 +49,7 @@ const getNativeBasisTheoryThreeDS = (): Spec | null => {
     unifiedNativeModuleProxy:
       runtimeGlobals.RN$UnifiedNativeModuleProxy ?? false,
     turboModuleProxyAvailable: turboModuleProxy !== undefined,
-    reactNativeVersion: Platform.constants.reactNativeVersion,
+    reactNativeVersion: Platform.constants?.reactNativeVersion,
   });
 
   return nativeModule;
@@ -59,6 +65,20 @@ export const isThreeDSTurboModuleAvailable = (): boolean =>
 const requireModule = () => {
   const nativeModule = getNativeBasisTheoryThreeDS();
   if (!supportedPlatform || nativeModule === null) {
+    if (Platform.OS === 'android') {
+      // global.__turboModuleProxy is confirmed absent on Android Bridgeless
+      // hosts even when the Kotlin module registers successfully. This is a
+      // React Native runtime limitation, not a missing install step — use
+      // BasisTheoryThreeDSNative (Bridge) on Android instead. Details:
+      // docs/ANDROID-TURBOMODULE-INVESTIGATION.md
+      throw new Error(
+        'NativeBasisTheoryThreeDS (TurboModule) is not reachable on Android. ' +
+          'This is a known React Native Bridgeless runtime limitation, not a ' +
+          'missing install step — see docs/ANDROID-TURBOMODULE-INVESTIGATION.md. ' +
+          'Use BasisTheoryThreeDSNative (Bridge) on Android instead.'
+      );
+    }
+
     throw new Error(
       'NativeBasisTheoryThreeDS is unavailable. Generate and rebuild the native app before using the TurboModule integration.'
     );

@@ -7,6 +7,9 @@
 #import "BasisTheoryReactNativeThreeDS-Swift.h"
 #endif
 
+// Only compiled in when RCT_NEW_ARCH_ENABLED == 1 — see
+// BasisTheoryReactNativeThreeDS.podspec and
+// docs/REGISTRATION-AND-PACKAGING.md.
 @interface BasisTheoryThreeDSTurbo () <NativeBasisTheoryThreeDSSpec>
 @end
 

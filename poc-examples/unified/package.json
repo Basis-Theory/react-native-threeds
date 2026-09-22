@@ -1,0 +1,30 @@
+{
+  "name": "bt-3ds-unified-poc",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android --reset-cache",
+    "ios": "expo start --ios --reset-cache",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@basis-theory/react-native-threeds": "workspace:*",
+    "@expo/metro-runtime": "~6.1.2",
+    "@react-native-picker/picker": "2.11.1",
+    "expo": "~54.0.12",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-toast-message": "^2.2.1",
+    "react-native-web": "~0.21.0",
+    "react-native-webview": "13.15.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "react-native-builder-bob": "^0.30.2",
+    "react-native-dotenv": "^3.4.11"
+  },
+  "private": true
+}
