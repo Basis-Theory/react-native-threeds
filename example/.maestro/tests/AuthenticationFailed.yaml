@@ -1,0 +1,20 @@
+appId: com.basistheory.reactnativethreeds.example
+---
+# Sandbox card 4264281511112228 ("Authentication Failed") drives the SDK to
+# the 'failed' status without a challenge UI, so this doesn't need to guess
+# at the native challenge screen's layout.
+- launchApp
+- extendedWaitUntil:
+    visible: 'Native 3DS ready'
+    timeout: 60000
+- tapOn:
+    id: 'card-number-input'
+- eraseText: 16
+- inputText: '4264281511112228'
+- hideKeyboard
+- tapOn:
+    id: 'checkout-button'
+- extendedWaitUntil:
+    visible: 'bridge: failed'
+    timeout: 30000
+- stopApp

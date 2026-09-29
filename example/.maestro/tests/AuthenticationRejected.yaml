@@ -1,0 +1,19 @@
+appId: com.basistheory.reactnativethreeds.example
+---
+# Sandbox card 5405001111111116 ("Authentication Rejected") drives the SDK to
+# the 'rejected' status without a challenge UI.
+- launchApp
+- extendedWaitUntil:
+    visible: 'Native 3DS ready'
+    timeout: 60000
+- tapOn:
+    id: 'card-number-input'
+- eraseText: 16
+- inputText: '5405001111111116'
+- hideKeyboard
+- tapOn:
+    id: 'checkout-button'
+- extendedWaitUntil:
+    visible: 'bridge: rejected'
+    timeout: 30000
+- stopApp

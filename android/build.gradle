@@ -20,8 +20,6 @@ react {
     codegenJavaPackageName = "com.basistheory.reactnativethreeds"
 }
 
-def newArchitectureEnabled = (findProperty("newArchEnabled") ?: "false").toBoolean()
-
 android {
     namespace "com.basistheory.reactnativethreeds"
     compileSdk 35
@@ -43,14 +41,14 @@ android {
     sourceSets {
         main {
             java {
-                // Each POC app compiles only the adapter for the architecture
-                // it is proving. This avoids generated-spec references in the
-                // RN 0.74 Bridge build and legacy registration in RN 0.86.
-                if (newArchitectureEnabled) {
-                    exclude "**/BasisTheoryThreeDSBridge*.kt"
-                } else {
-                    exclude "**/BasisTheoryThreeDSTurbo*.kt"
-                }
+                // The TurboModule is not reachable from JavaScript on Android
+                // regardless of the architecture flag — Bridgeless hosts do
+                // not expose __turboModuleProxy even when this Kotlin class
+                // registers successfully. Always compile and autolink the
+                // Bridge adapter on Android instead; it runs on new-arch
+                // hosts through React Native's Bridge/TurboModule interop
+                // layer, unlike this repository's TurboModule.
+                exclude "**/BasisTheoryThreeDSTurbo*.kt"
             }
         }
     }
@@ -59,9 +57,19 @@ android {
 repositories {
     google()
     mavenCentral()
-    // The locally substituted Android 3DS SDK depends on Ravelin's public 3DS
+    // com.basistheory:android-threeds depends on Ravelin's public 3DS
     // artifact. Declaring it here also lets IDE sync resolve the adapter model.
     maven { url "https://maven.ravelin.com/public/repositories/threeds2service/" }
+    // android-threeds publishes to GitHub Packages (see its own
+    // lib/build.gradle `publishing {}` block) — Maven on GitHub Packages
+    // requires an authenticated token even for a public repo/package.
+    maven {
+        url "https://maven.pkg.github.com/basis-theory/android-threeds"
+        credentials {
+            username = System.getenv("GITHUB_ACTOR") ?: "basis-theory"
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {

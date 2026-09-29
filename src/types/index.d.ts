@@ -42,9 +42,25 @@ interface CreateNativeThreeDSSessionRequest {
   tokenIntentId?: string;
 }
 
+/**
+ * EMV 3DS transaction status codes translated to human-readable strings by
+ * the native 3DS SDK, identically on both platforms:
+ * android-threeds `lib/src/main/java/com/basistheory/threeds/service/ThreeDSService.kt`
+ * (`transactionStatusMap`) and ios-threeds
+ * `ThreeDS/Sources/ThreeDS/ChallengeHandler.swift`. A cancelled or timed-out
+ * challenge still resolves as `'failed'`; the reason is carried in
+ * `NativeThreeDSResult.details` instead of a separate status value.
+ */
+type ThreeDSAuthenticationStatus =
+  | 'successful'
+  | 'attempted'
+  | 'failed'
+  | 'unavailable'
+  | 'rejected';
+
 interface NativeThreeDSResult {
   id: string;
-  status: string;
+  status: ThreeDSAuthenticationStatus;
   details?: string;
 }
 
@@ -56,4 +72,5 @@ export type {
   NativeThreeDSConfiguration,
   CreateNativeThreeDSSessionRequest,
   NativeThreeDSResult,
+  ThreeDSAuthenticationStatus,
 };

@@ -21,14 +21,8 @@ type ReactNativeRuntimeGlobals = typeof globalThis & {
 };
 
 const getNativeBasisTheoryThreeDS = (): Spec | null => {
-  // This is where TurboModule registration surfaces in JavaScript. It only
-  // resolves if BasisTheoryThreeDSTurboPackage.kt (Android) or
-  // BasisTheoryThreeDSTurbo.mm (iOS) actually compiled into this build — see
-  // docs/REGISTRATION-AND-PACKAGING.md for the full path from a Kotlin/Swift
-  // class to this lookup.
-  //
-  // Read the current proxy as well as Codegen's module result so this POC can
-  // distinguish registration failures from a host that did not install JSI.
+  // Read the current proxy as well as Codegen's module result to distinguish
+  // registration failures from a host that did not install JSI.
   const runtimeGlobals = globalThis as ReactNativeRuntimeGlobals;
   const turboModuleProxy = runtimeGlobals.__turboModuleProxy;
   const legacyModule = NativeModules?.NativeBasisTheoryThreeDS as
@@ -69,13 +63,12 @@ const requireModule = () => {
       // global.__turboModuleProxy is confirmed absent on Android Bridgeless
       // hosts even when the Kotlin module registers successfully. This is a
       // React Native runtime limitation, not a missing install step — use
-      // BasisTheoryThreeDSNative (Bridge) on Android instead. Details:
-      // docs/ANDROID-TURBOMODULE-INVESTIGATION.md
+      // BasisTheoryThreeDSNative (Bridge) on Android instead.
       throw new Error(
         'NativeBasisTheoryThreeDS (TurboModule) is not reachable on Android. ' +
           'This is a known React Native Bridgeless runtime limitation, not a ' +
-          'missing install step — see docs/ANDROID-TURBOMODULE-INVESTIGATION.md. ' +
-          'Use BasisTheoryThreeDSNative (Bridge) on Android instead.'
+          'missing install step — see the "Native integration" section of the ' +
+          'README. Use BasisTheoryThreeDSNative (Bridge) on Android instead.'
       );
     }
 
@@ -123,6 +116,10 @@ export const BasisTheoryThreeDSTurbo = {
       return Promise.reject(new Error('sessionId is required.'));
     }
 
-    return requireModule().startAuthentication(sessionId);
+    // Codegen's Spec keeps `status` as `string` (the generated native
+    // signatures cannot express a literal union); the public
+    // NativeThreeDSResult narrows it to the fixed vocabulary the native SDK
+    // actually returns (see src/types/index.d.ts).
+    return requireModule().startAuthentication(sessionId) as Promise<NativeThreeDSResult>;
   },
 };

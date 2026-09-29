@@ -1,0 +1,25 @@
+appId: com.basistheory.reactnativethreeds.example
+---
+- launchApp
+- extendedWaitUntil:
+    visible: 'Native 3DS ready'
+    timeout: 60000
+- tapOn:
+    id: 'card-number-input'
+- eraseText: 16
+- inputText: '4000020000000000'
+- hideKeyboard
+- tapOn:
+    id: 'checkout-button'
+- extendedWaitUntil:
+    visible: 'Purchase authentication'
+    timeout: 30000
+- tapOn:
+    below: 'Enter your code below'
+- inputText: '1234'
+- tapOn: 'Purchase authentication'
+- tapOn: 'Submit'
+- extendedWaitUntil:
+    visible: 'bridge: successful'
+    timeout: 30000
+- stopApp

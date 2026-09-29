@@ -54,18 +54,36 @@ const App = () => {
 
 For a complete list of endpoints and examples, please refer to our [official documentation](https://developers.basistheory.com/docs/sdks/mobile/3ds-react-native/)
 
-## ENG-12518 native integration POC
+## Native integration
 
-The `ENG-12518` branch contains two local, non-production example apps under
-`poc-examples`: one validates the React Native Bridge and one validates a
-Codegen TurboModule. Both keep the existing WebView renderer for side-by-side
-comparison on iOS and Android.
+Besides the default WebView renderer, this SDK supports native 3DS on iOS and
+Android:
 
-Start with the [local runbook](docs/LOCAL-RUNBOOK.md), then use the
-[architecture overview](docs/ARCHITECTURE.md), [code map](docs/CODE-MAP.md), and
-[test matrix](docs/TESTING.md). Native SDK source checkouts and the merchant
-authentication backend are prepared through `poc-support`; private keys remain
-outside the mobile apps.
+| Strategy | iOS | Android |
+| --- | --- | --- |
+| WebView (default) | ✅ | ✅ |
+| Bridge | ✅ | ✅ |
+| TurboModule | ✅ | not available — see below |
+
+```ts
+import { BasisTheoryThreeDS } from '@basis-theory/react-native-threeds';
+
+// Picks TurboModule on iOS when compiled, Bridge everywhere else.
+await BasisTheoryThreeDS.configure({ apiKey, authenticationEndpoint });
+```
+
+To force a specific strategy instead of the default, use
+`BasisTheoryThreeDSStrategies.{ios,android}.{bridge,turboModule}`.
+
+Android does not expose a TurboModule strategy: React Native's Bridgeless
+runtime does not reach a registered Android TurboModule regardless of the
+architecture flag, so `android/build.gradle` always compiles and autolinks
+the Bridge adapter instead. The full investigation (two independent hosts,
+logs, and external references) lives in the `ENG-12518` branch/PR history.
+
+See [`example/`](example) for a runnable reference app, and
+[developers.basistheory.com](https://developers.basistheory.com/docs/sdks/mobile/3ds-react-native/)
+for the full setup guide.
 
 
 ## Contributing

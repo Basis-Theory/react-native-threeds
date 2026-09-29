@@ -10,11 +10,10 @@ import com.facebook.react.module.model.ReactModuleInfoProvider
 /**
  * Registers the generated TurboModule implementation with React Native.
  *
- * Only compiled in when the client's `newArchEnabled` Gradle property is
- * true — see android/build.gradle's source-set exclusion and
- * docs/REGISTRATION-AND-PACKAGING.md. Compiling successfully does not mean
- * JavaScript can reach it on Android; see
- * docs/ANDROID-TURBOMODULE-INVESTIGATION.md.
+ * `android/build.gradle` always excludes this class from Android builds:
+ * compiling it successfully does not mean JavaScript can reach it on
+ * Android — see the "Native integration" section of the README. This file
+ * is kept for anyone investigating that gap, not for production use.
  */
 class BasisTheoryThreeDSTurboPackage : BaseReactPackage() {
     override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? =

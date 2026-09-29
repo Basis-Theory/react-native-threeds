@@ -8,8 +8,7 @@
 #endif
 
 // Only compiled in when RCT_NEW_ARCH_ENABLED == 1 — see
-// BasisTheoryReactNativeThreeDS.podspec and
-// docs/REGISTRATION-AND-PACKAGING.md.
+// BasisTheoryReactNativeThreeDS.podspec.
 @interface BasisTheoryThreeDSTurbo () <NativeBasisTheoryThreeDSSpec>
 @end
 

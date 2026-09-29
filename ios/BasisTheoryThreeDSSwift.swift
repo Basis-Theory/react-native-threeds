@@ -1,6 +1,6 @@
 import Foundation
 import React
-import ThreeDS
+// ThreeDS is vendored into this same module — see BasisTheoryThreeDS.swift.
 
 /// The Swift implementation behind the generated TurboModule interface.
 ///

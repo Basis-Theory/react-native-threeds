@@ -33,3 +33,150 @@ jobs:
         run: make verify
         env:
           SKIP_INSTALL: 1 # install with cache was done already
+
+  ios-e2e:
+    # iOS compiles a different adapter per architecture (Bridge vs.
+    # TurboModule, chosen by the podspec's RCT_NEW_ARCH_ENABLED branch), so
+    # both legs run. Android needs no matrix: android/build.gradle always
+    # compiles the Bridge adapter regardless of newArchEnabled.
+    name: iOS E2E (${{ matrix.newArch == 'true' && 'TurboModule' || 'Bridge' }})
+    runs-on: macOS-15-xlarge
+    environment: PR
+    strategy:
+      fail-fast: false
+      matrix:
+        newArch: ['true', 'false']
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '20.x'
+
+      - name: Install JS deps
+        run: yarn --immutable
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 'latest-stable'
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Configure example env
+        run: |
+          cp example/.env.example example/.env
+          sed -i '' "s#^PUBLIC_API_KEY=.*#PUBLIC_API_KEY=${{ secrets.BT_API_KEY_PUB }}#" example/.env
+
+      - name: Select architecture
+        working-directory: example/ios
+        run: |
+          sed -i '' 's/"newArchEnabled": "[a-z]*"/"newArchEnabled": "${{ matrix.newArch }}"/' Podfile.properties.json
+          grep '"newArchEnabled": "${{ matrix.newArch }}"' Podfile.properties.json
+
+      - name: Install Pods
+        working-directory: example/ios
+        run: pod install
+
+      - name: Start merchant backend
+        working-directory: example/.maestro/support/3ds-auth-backend
+        run: yarn && yarn start &
+        env:
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Boot Simulator
+        run: |
+          SIMULATOR_UUID=$(xcrun simctl list devices available | grep -E '^\s+iPhone' | grep -oE '[0-9A-F-]{36}' | head -n 1)
+          echo "SIMULATOR_UUID=$SIMULATOR_UUID" >> "$GITHUB_ENV"
+          xcrun simctl bootstatus "$SIMULATOR_UUID" -b
+
+      # Release, not Debug: a Debug React Native build loads its JS from a
+      # running Metro server, which this job never starts. Release embeds the
+      # JS bundle in the app. (The native-only ios-threeds/android-threeds
+      # workflows this is adapted from have no JS bundle, so they use Debug.)
+      - name: Build BT3DSBridgePOC
+        working-directory: example/ios
+        run: |
+          xcrun xcodebuild -workspace BT3DSBridgePOC.xcworkspace \
+            -scheme BT3DSBridgePOC \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=${SIMULATOR_UUID}" \
+            -derivedDataPath .build
+
+      - name: Install and run Maestro tests
+        working-directory: example/ios
+        run: |
+          xcrun simctl install "$SIMULATOR_UUID" .build/Build/Products/Release-iphonesimulator/BT3DSBridgePOC.app
+          export MAESTRO_CLI_NO_ANALYTICS=1
+          maestro --device "$SIMULATOR_UUID" test ../.maestro/tests
+
+  android-e2e:
+    name: Android E2E (Bridge)
+    runs-on: ubuntu-latest-16-cores
+    environment: PR
+    env:
+      BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '20.x'
+
+      - name: Install JS deps
+        run: yarn --immutable
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Configure example env
+        run: |
+          cp example/.env.example example/.env
+          sed -i "s#^PUBLIC_API_KEY=.*#PUBLIC_API_KEY=${{ secrets.BT_API_KEY_PUB }}#" example/.env
+          sed -i "s#^AUTHENTICATION_ENDPOINT=.*#AUTHENTICATION_ENDPOINT=http://10.0.2.2:3333/3ds/authenticate#" example/.env
+
+      - name: Start merchant backend
+        working-directory: example/.maestro/support/3ds-auth-backend
+        run: yarn && yarn start &
+
+      - name: Enable KVM group perms for hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build example app
+        working-directory: example/android
+        # Release embeds the JS bundle (see the iOS build step); the example's
+        # release build type is signed with the debug keystore.
+        run: ./gradlew assembleRelease
+
+      - name: Install and run Maestro tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          profile: pixel_7
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            adb install example/android/app/build/outputs/apk/release/app-release.apk
+            export MAESTRO_CLI_NO_ANALYTICS=1
+            maestro test example/.maestro/tests

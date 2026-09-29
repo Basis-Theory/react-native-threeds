@@ -1,6 +1,9 @@
 import Foundation
 import React
-import ThreeDS
+// ThreeDS's own source is vendored directly into this pod's target by
+// BasisTheoryReactNativeThreeDS.podspec's prepare_command (it has no
+// CocoaPods podspec of its own), so its types are already part of this
+// module — no `import ThreeDS` needed or possible.
 
 /// A deliberately thin React Native adapter around the Basis Theory iOS 3DS SDK.
 ///
