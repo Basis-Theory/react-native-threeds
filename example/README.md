@@ -16,8 +16,8 @@ BasisTheoryThreeDSStrategies.ios.turboModule
 BasisTheoryThreeDSStrategies.android.bridge
 ```
 
-The UI in `src/App.tsx` exposes a Bridge/TurboModule selector so you can flip
-between them without restarting Metro.
+A build compiles exactly one adapter, chosen by the architecture flag, so the
+app starts on that one and the selector in `src/App.tsx` disables the other.
 
 ## Per-platform status
 
@@ -31,20 +31,22 @@ between them without restarting Metro.
 
 ## Known follow-ups
 
-- The Xcode project (`BT3DSBridgePOC.xcodeproj`/`.xcworkspace`) and Gradle
-  `rootProject.name` still carry naming from when this was a POC-comparison
-  app. The bundle identifier, Android package/namespace, `package.json` name,
-  and `app.json` name/slug were already updated to drop that naming; renaming
-  the Xcode project/scheme/workspace files themselves is cosmetic and left as
-  a follow-up, since it requires hand-editing `project.pbxproj` structure
-  rather than a simple text substitution.
-- `com.basistheory:android-threeds` and the `ThreeDS` pod resolve from a
-  local checkout today. See the `TODO(ENG-12926)` comments in
-  `android/settings.gradle`, `ios/Podfile`, `../android/build.gradle`, and
-  `../BasisTheoryReactNativeThreeDS.podspec` for exactly what needs to change
-  once Basis Theory's private registry URLs are confirmed.
+- The Xcode project (`BT3DSBridgePOC.xcodeproj`/`.xcworkspace`) still carries
+  naming from when this was a POC-comparison app. The bundle identifier,
+  Android package/namespace, Gradle `rootProject.name`, `package.json` name,
+  and `app.json` name/slug were already updated; renaming the Xcode
+  project/scheme/workspace files is cosmetic and left as a follow-up, since it
+  requires hand-editing `project.pbxproj` structure.
 
 ## Running it
 
 Re-run `pod install` under `ios/` after changing `newArchEnabled` if you have
 not already.
+
+The Maestro flows in `.maestro/tests` need the strategy the build compiled,
+so each run passes it explicitly and asserts it:
+
+```sh
+maestro test -e STRATEGY=turboModule .maestro/tests  # iOS, newArchEnabled true
+maestro test -e STRATEGY=bridge .maestro/tests       # iOS legacy, or Android
+```

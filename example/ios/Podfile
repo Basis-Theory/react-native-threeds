@@ -23,12 +23,6 @@ prepare_react_native_project!
 target 'BT3DSBridgePOC' do
   use_expo_modules!
 
-  # TODO(ENG-12926): the package's own podspec already declares
-  # `spec.dependency 'ThreeDS', '1.2.1'`, so this target does not need its own
-  # `pod 'ThreeDS'` line. `pod install` can only resolve it once Basis
-  # Theory's private CocoaPods source is added to this Podfile's `source`
-  # list (or the pod is published to the public trunk).
-
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
   else

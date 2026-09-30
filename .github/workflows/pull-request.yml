@@ -112,7 +112,7 @@ jobs:
         run: |
           xcrun simctl install "$SIMULATOR_UUID" .build/Build/Products/Release-iphonesimulator/BT3DSBridgePOC.app
           export MAESTRO_CLI_NO_ANALYTICS=1
-          maestro --device "$SIMULATOR_UUID" test ../.maestro/tests
+          maestro --device "$SIMULATOR_UUID" test -e STRATEGY=${{ matrix.newArch == 'true' && 'turboModule' || 'bridge' }} ../.maestro/tests
 
   android-e2e:
     name: Android E2E (Bridge)
@@ -179,4 +179,4 @@ jobs:
           script: |
             adb install example/android/app/build/outputs/apk/release/app-release.apk
             export MAESTRO_CLI_NO_ANALYTICS=1
-            maestro test example/.maestro/tests
+            maestro test -e STRATEGY=bridge example/.maestro/tests

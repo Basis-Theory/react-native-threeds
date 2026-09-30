@@ -7,6 +7,7 @@ appId: com.basistheory.reactnativethreeds.example
 - extendedWaitUntil:
     visible: 'Native 3DS ready'
     timeout: 60000
+- assertVisible: 'Active strategy: ${STRATEGY}'
 - tapOn:
     id: 'card-number-input'
 - eraseText: 16
@@ -15,6 +16,6 @@ appId: com.basistheory.reactnativethreeds.example
 - tapOn:
     id: 'checkout-button'
 - extendedWaitUntil:
-    visible: '(bridge|turboModule): failed'
+    visible: '${STRATEGY}: failed'
     timeout: 30000
 - stopApp

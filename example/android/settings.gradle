@@ -35,11 +35,5 @@ rootProject.name = 'BasisTheoryThreeDSExample'
 
 expoAutolinking.useExpoVersionCatalog()
 
-// TODO(ENG-12926): `com.basistheory:android-threeds:1.2.1` (declared in
-// ../../android/build.gradle) must resolve from Basis Theory's private Maven
-// repository once its URL is confirmed and added to that file's
-// `repositories {}` block. Until then, `./gradlew` cannot resolve this
-// dependency here.
-
 include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
