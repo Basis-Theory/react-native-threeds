@@ -20,6 +20,6 @@ appId: com.basistheory.reactnativethreeds.example
 - tapOn: 'Purchase authentication'
 - tapOn: 'Submit'
 - extendedWaitUntil:
-    visible: 'bridge: successful'
+    visible: '(bridge|turboModule): successful'
     timeout: 30000
 - stopApp

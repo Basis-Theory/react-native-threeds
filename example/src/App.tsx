@@ -47,11 +47,18 @@ const isStrategyAvailable = (strategy: Strategy): boolean =>
     ? isNativeThreeDSAvailable
     : isThreeDSTurboModuleAvailable();
 
+// A build compiles exactly one adapter, chosen by the host's architecture
+// flag, so start on whichever one this binary actually contains.
+const initialStrategy: Strategy =
+  Platform.OS === 'ios' && isStrategyAvailable('turboModule')
+    ? 'turboModule'
+    : 'bridge';
+
 const App: React.FC = () => <MainScreen />;
 
 const MainScreen: React.FC = () => {
   const [isBusy, setIsBusy] = React.useState<boolean>(false);
-  const [strategy, setStrategy] = React.useState<Strategy>('bridge');
+  const [strategy, setStrategy] = React.useState<Strategy>(initialStrategy);
   const [cardNumber, setCardNumber] =
     React.useState<string>('5204247750001471');
   const [nativeStatus, setNativeStatus] =
@@ -142,14 +149,14 @@ const MainScreen: React.FC = () => {
           <StrategyOption
             label="Bridge"
             selected={strategy === 'bridge'}
-            disabled={isBusy}
+            disabled={isBusy || !isStrategyAvailable('bridge')}
             onPress={() => setStrategy('bridge')}
           />
           {Platform.OS === 'ios' && (
             <StrategyOption
               label="TurboModule"
               selected={strategy === 'turboModule'}
-              disabled={isBusy}
+              disabled={isBusy || !isStrategyAvailable('turboModule')}
               onPress={() => setStrategy('turboModule')}
             />
           )}

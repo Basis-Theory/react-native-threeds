@@ -15,6 +15,6 @@ appId: com.basistheory.reactnativethreeds.example
 - tapOn:
     id: 'checkout-button'
 - extendedWaitUntil:
-    visible: 'bridge: failed'
+    visible: '(bridge|turboModule): failed'
     timeout: 30000
 - stopApp
