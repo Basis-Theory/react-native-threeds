@@ -20,71 +20,104 @@ yarn add @basis-theory/react-native-threeds
 
 ## Usage
 
-To use the React Native SDK methods, you need to wrap your app with the `BasisTheory3dsProvider` component. This component will provide the SDK methods to the rest of your app.
+The SDK offers three strategies. They share the same flow: tokenize the card, create a 3DS session, and let your backend authenticate it with your private API key.
 
-```jsx
-import { BasisTheoryProvider } from '@basis-theory/react-native-threeds';
+| Strategy | iOS | Android | Expo Go |
+| --- | --- | --- | --- |
+| WebView | ✅ | ✅ | ✅ |
+| Bridge | ✅ | ✅ | ❌ |
+| TurboModule | ✅ | ❌ | ❌ |
 
-const App = () => {
-  return (
-    <BasisTheoryProvider>
-      <YourApp />
-    </BasisTheoryProvider>
-  );
-};
-```
+The native strategies (Bridge and TurboModule) need a development build (`expo prebuild` or a bare React Native app). Expo Go can only use the WebView.
 
-After that, you can access the SDK methods using the `useBasisTheory3ds` hook.
+The examples below take a `tokenId` for a card token you already created, for example with [React Native Elements](https://developers.basistheory.com/docs/sdks/mobile/react-native/).
 
-```jsx
-import { BasisTheory3dsProvider, useBasisTheory3ds } from '@basis-theory/react-native-threeds';
+### WebView
 
-const App = () => {
+Wrap your app with `BasisTheory3dsProvider` and use `useBasisTheory3ds` in any component below it. The provider renders the challenge as an overlay on top of its children, so mount it at the root of your app.
+
+```tsx
+import { Button } from 'react-native';
+import {
+  BasisTheory3dsProvider,
+  useBasisTheory3ds,
+} from '@basis-theory/react-native-threeds';
+
+const App = () => (
+  <BasisTheory3dsProvider apiKey="<PUBLIC_API_KEY>">
+    <Checkout tokenId="<TOKEN_ID>" />
+  </BasisTheory3dsProvider>
+);
+
+const Checkout = ({ tokenId }: { tokenId: string }) => {
   const { createSession, startChallenge } = useBasisTheory3ds();
 
-  return (
-    <BasisTheoryProvider>
-      <YourApp />
-    </BasisTheoryProvider>
-  );
+  const pay = async () => {
+    const session = await createSession({ tokenId });
+
+    // Your backend authenticates the session with your private API key.
+    const authentication = await yourBackend.authenticate(session.id);
+
+    if (authentication.authentication_status_code === 'C') {
+      await startChallenge({
+        sessionId: session.id,
+        acsChallengeUrl: authentication.acs_challenge_url,
+        acsTransactionId: authentication.acs_transaction_id,
+        threeDSVersion: authentication.threeds_version,
+      });
+    }
+  };
+
+  return <Button title="Pay" onPress={pay} />;
 };
 ```
+
+### Native
+
+`BasisTheoryThreeDS` uses the TurboModule on iOS when your build compiled it, and the Bridge everywhere else. No provider is needed. The native SDK calls your `authenticationEndpoint` with the session ID and, if the bank requires a challenge, presents it on top of your app.
+
+```tsx
+import { useEffect, useState } from 'react';
+import { Button } from 'react-native';
+import { BasisTheoryThreeDS } from '@basis-theory/react-native-threeds';
+
+const Checkout = ({ tokenId }: { tokenId: string }) => {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    BasisTheoryThreeDS.configure({
+      apiKey: '<PUBLIC_API_KEY>',
+      // Your backend: receives the session ID and authenticates it with your private API key.
+      authenticationEndpoint: 'https://your-backend.example.com/3ds/authenticate',
+    }).then(() => setReady(true));
+  }, []);
+
+  const pay = async () => {
+    const session = await BasisTheoryThreeDS.createSession({ tokenId });
+    const result = await BasisTheoryThreeDS.startAuthentication(session.id);
+    // result.status: 'successful' | 'attempted' | 'failed' | 'unavailable' | 'rejected'
+  };
+
+  return <Button title="Pay" disabled={!ready} onPress={pay} />;
+};
+```
+
+A failed or cancelled challenge resolves with `status: 'failed'` and the reason in `result.details`. The promise only rejects on configuration, transport, or SDK errors.
+
+To force one strategy, use `BasisTheoryThreeDSStrategies.ios.bridge`, `BasisTheoryThreeDSStrategies.ios.turboModule`, or `BasisTheoryThreeDSStrategies.android.bridge`. They expose the same methods. The strategy you pick must be the one your build compiled; check with `isThreeDSTurboModuleAvailable()` or `isNativeThreeDSAvailable`.
+
+### Choosing the native strategy
+
+Each build compiles exactly one native adapter:
+
+- **iOS:** `newArchEnabled` in `ios/Podfile.properties.json` (or `RCT_NEW_ARCH_ENABLED=1 pod install`). `true` compiles the TurboModule and `false` compiles the Bridge. Run `pod install` again after changing it.
+- **Android:** nothing to configure. The Bridge is always compiled, because React Native's Bridgeless runtime does not reach a registered Android TurboModule.
+
+Tested with React Native 0.81.5 (see [`example/`](example)).
 
 ## Documentation
 
-For a complete list of endpoints and examples, please refer to our [official documentation](https://developers.basistheory.com/docs/sdks/mobile/3ds-react-native/)
-
-## Native integration
-
-Besides the default WebView renderer, this SDK supports native 3DS on iOS and
-Android:
-
-| Strategy | iOS | Android |
-| --- | --- | --- |
-| WebView (default) | ✅ | ✅ |
-| Bridge | ✅ | ✅ |
-| TurboModule | ✅ | not available — see below |
-
-```ts
-import { BasisTheoryThreeDS } from '@basis-theory/react-native-threeds';
-
-// Picks TurboModule on iOS when compiled, Bridge everywhere else.
-await BasisTheoryThreeDS.configure({ apiKey, authenticationEndpoint });
-```
-
-To force a specific strategy instead of the default, use
-`BasisTheoryThreeDSStrategies.{ios,android}.{bridge,turboModule}`.
-
-Android does not expose a TurboModule strategy: React Native's Bridgeless
-runtime does not reach a registered Android TurboModule regardless of the
-architecture flag, so `android/build.gradle` always compiles and autolinks
-the Bridge adapter instead. The full investigation (two independent hosts,
-logs, and external references) lives in the `ENG-12518` branch/PR history.
-
-See [`example/`](example) for a runnable reference app, and
-[developers.basistheory.com](https://developers.basistheory.com/docs/sdks/mobile/3ds-react-native/)
-for the full setup guide.
-
+For a complete list of endpoints and examples, please refer to our [official documentation](https://developers.basistheory.com/docs/sdks/mobile/3ds-react-native/).
 
 ## Contributing
 
