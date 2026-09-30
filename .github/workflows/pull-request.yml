@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [master, release]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   verify:
     runs-on: ${{ matrix.os }}
@@ -47,6 +51,18 @@ jobs:
       matrix:
         newArch: ['true', 'false']
     steps:
+      # Secrets are passed through `env:` and scoped to the steps that need
+      # them. Never print their names or values.
+      - name: Check secrets
+        run: |
+          if [ -z "$BT_API_KEY_PUB" ] || [ -z "$BT_API_KEY_PVT" ]; then
+            echo "::error::Missing secret"
+            exit 1
+          fi
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -68,8 +84,12 @@ jobs:
 
       - name: Configure example env
         run: |
-          cp example/.env.example example/.env
-          sed -i '' "s#^PUBLIC_API_KEY=.*#PUBLIC_API_KEY=${{ secrets.BT_API_KEY_PUB }}#" example/.env
+          {
+            grep -v '^PUBLIC_API_KEY=' example/.env.example
+            printf 'PUBLIC_API_KEY=%s\n' "$BT_API_KEY_PUB"
+          } > example/.env
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
 
       - name: Select architecture
         working-directory: example/ios
@@ -81,11 +101,22 @@ jobs:
         working-directory: example/ios
         run: pod install
 
+      # Dependencies come from the root workspace install, so no install
+      # scripts run with the private key in the environment.
       - name: Start merchant backend
         working-directory: example/.maestro/support/3ds-auth-backend
-        run: yarn && yarn start &
+        run: yarn start > /dev/null 2>&1 &
         env:
           BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Wait for merchant backend
+        run: |
+          for _ in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:3333 && exit 0
+            sleep 1
+          done
+          echo "::error::Merchant backend did not start"
+          exit 1
 
       - name: Boot Simulator
         run: |
@@ -118,10 +149,17 @@ jobs:
     name: Android E2E (Bridge)
     runs-on: ubuntu-latest-16-cores
     environment: PR
-    env:
-      BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Check secrets
+        run: |
+          if [ -z "$BT_API_KEY_PUB" ] || [ -z "$BT_API_KEY_PVT" ]; then
+            echo "::error::Missing secret"
+            exit 1
+          fi
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -146,13 +184,30 @@ jobs:
 
       - name: Configure example env
         run: |
-          cp example/.env.example example/.env
-          sed -i "s#^PUBLIC_API_KEY=.*#PUBLIC_API_KEY=${{ secrets.BT_API_KEY_PUB }}#" example/.env
-          sed -i "s#^AUTHENTICATION_ENDPOINT=.*#AUTHENTICATION_ENDPOINT=http://10.0.2.2:3333/3ds/authenticate#" example/.env
+          {
+            grep -v -e '^PUBLIC_API_KEY=' -e '^AUTHENTICATION_ENDPOINT=' example/.env.example
+            printf 'PUBLIC_API_KEY=%s\n' "$BT_API_KEY_PUB"
+            echo 'AUTHENTICATION_ENDPOINT=http://10.0.2.2:3333/3ds/authenticate'
+          } > example/.env
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
 
+      # Dependencies come from the root workspace install, so no install
+      # scripts run with the private key in the environment.
       - name: Start merchant backend
         working-directory: example/.maestro/support/3ds-auth-backend
-        run: yarn && yarn start &
+        run: yarn start > /dev/null 2>&1 &
+        env:
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Wait for merchant backend
+        run: |
+          for _ in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:3333 && exit 0
+            sleep 1
+          done
+          echo "::error::Merchant backend did not start"
+          exit 1
 
       - name: Enable KVM group perms for hardware acceleration
         run: |
@@ -165,6 +220,9 @@ jobs:
         # Release embeds the JS bundle (see the iOS build step); the example's
         # release build type is signed with the debug keystore.
         run: ./gradlew assembleRelease
+        env:
+          # Read-only access to the android-threeds GitHub Packages Maven repo.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install and run Maestro tests
         uses: reactivecircus/android-emulator-runner@v2
