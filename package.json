@@ -36,7 +36,9 @@
         "types": "./dist/typescript/commonjs/src/index.d.ts",
         "default": "./dist/commonjs/index.js"
       }
-    }
+    },
+    "./app.plugin.js": "./app.plugin.js",
+    "./package.json": "./package.json"
   },
   "files": [
     "src",

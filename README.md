@@ -87,16 +87,21 @@ Native 3DS is off by default, so WebView-only apps build exactly as before: no n
 Then rebuild the app.
 
 - **iOS:** run `pod install`. It downloads Ravelin's 3DS SDK, which the native integration uses. Requires iOS 15 or later.
-- **Android:** Ravelin's 3DS SDK requires [core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring) in your app module, and a library can't enable it for you.
-  - **Expo (`expo prebuild`):** add the config plugin to `app.json` and it's added on every prebuild:
+- **Android:** Ravelin's 3DS SDK needs two changes in your app module that a library can't make for you: [core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring), and excluding a `META-INF` file that Ravelin's okhttp dependency and AndroidX both ship.
+  - **Expo (`expo prebuild`):** add the config plugin to `app.json` and it adds both on every prebuild:
     ```json
     { "expo": { "plugins": ["@basis-theory/react-native-threeds"] } }
     ```
-  - **Bare React Native:** add these lines to `android/app/build.gradle`:
+  - **Bare React Native, or Expo with a committed `android/`:** add these lines to `android/app/build.gradle`:
     ```groovy
     android {
         compileOptions {
             coreLibraryDesugaringEnabled true
+        }
+        packagingOptions {
+            resources {
+                excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            }
         }
     }
 

@@ -31,8 +31,8 @@ app starts on that one and the selector in `src/App.tsx` disables the other.
 
 Native 3DS is enabled the same way a customer app enables it: `package.json`
 sets `"@basis-theory/react-native-threeds": { "native": true }`, and
-`android/app/build.gradle` enables core library desugaring, which Ravelin's SDK
-requires. `android/app/src/main/res/xml/network_security_config.xml` allows
+`android/app/build.gradle` enables core library desugaring and excludes a
+duplicate `META-INF` entry, both of which Ravelin's SDK requires. `android/app/src/main/res/xml/network_security_config.xml` allows
 cleartext HTTP only to the local merchant backend.
 
 ## Running it
