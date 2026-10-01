@@ -38,6 +38,19 @@ rm -rf "$android_target"
 mkdir -p "$android_target"
 cp -R "$work_directory"/android-threeds/lib/src/main/java/com/basistheory/threeds/. "$android_target/"
 
+# android-threeds only applies its R8 rules to its own build, so ship them as
+# this library's consumer rules; apps that minify would otherwise strip
+# Ravelin and the crypto providers it loads by reflection.
+{
+  echo "# Vendored from android-threeds $ANDROID_THREEDS_TAG (commit $ANDROID_THREEDS_SHA) lib/proguard-rules.pro."
+  echo "# Do not edit; regenerate with scripts/vendor-threeds.sh."
+  cat "$work_directory/android-threeds/lib/proguard-rules.pro"
+  echo
+  echo "# Added by react-native-threeds. Ravelin's SDK references @Parcelize, a"
+  echo "# compile-time annotation it doesn't ship, which fails R8 in minified apps."
+  echo "-dontwarn kotlinx.parcelize.Parcelize"
+} > "$root_directory/android/consumer-rules.pro"
+
 cat > "$root_directory/ios/ThreeDS/VENDORED.md" <<EOF
 Vendored from https://github.com/Basis-Theory/ios-threeds
 tag $IOS_THREEDS_TAG, commit $IOS_THREEDS_SHA (Apache-2.0).

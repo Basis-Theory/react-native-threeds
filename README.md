@@ -110,7 +110,7 @@ Then rebuild the app.
     }
     ```
 
-  The library adds Ravelin's Maven repository to your build automatically. If your `settings.gradle` sets `repositoriesMode` to `FAIL_ON_PROJECT_REPOS`, add `https://maven.ravelin.com/public/repositories/threeds2service/` to your repositories instead.
+  The library adds Ravelin's Maven repository to your build automatically. If your `settings.gradle` sets `repositoriesMode` to `PREFER_SETTINGS` or `FAIL_ON_PROJECT_REPOS`, Gradle ignores or rejects that repository, so add `https://maven.ravelin.com/public/repositories/threeds2service/` to `dependencyResolutionManagement.repositories` in `settings.gradle` instead.
 
 Only enable `native` if you use `BasisTheoryThreeDS` or `BasisTheoryThreeDSStrategies`. Desugaring on its own is harmless in a WebView-only app: it adds Google's `desugar_jdk_libs` to the build and doesn't link any native 3DS code.
 

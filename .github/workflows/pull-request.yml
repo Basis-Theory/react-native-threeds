@@ -145,7 +145,7 @@ jobs:
           maestro --device "$SIMULATOR_UUID" test -e STRATEGY=${{ matrix.newArch == 'true' && 'turboModule' || 'bridge' }} ../.maestro/tests
 
   android-e2e:
-    name: Android E2E (Bridge)
+    name: Android E2E (Bridge, new architecture, R8)
     runs-on: ubuntu-latest-16-cores
     environment: PR
     steps:
@@ -217,8 +217,11 @@ jobs:
       - name: Build example app
         working-directory: example/android
         # Release embeds the JS bundle (see the iOS build step); the example's
-        # release build type is signed with the debug keystore.
-        run: ./gradlew assembleRelease
+        # release build type is signed with the debug keystore. Built like a
+        # production app: new architecture on and minified with R8, so the
+        # Bridge runs through React Native's interop layer and the library's
+        # consumer R8 rules are exercised.
+        run: ./gradlew assembleRelease -PnewArchEnabled=true -Pandroid.enableMinifyInReleaseBuilds=true
 
       - name: Install and run Maestro tests
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
