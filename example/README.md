@@ -35,15 +35,6 @@ sets `"@basis-theory/react-native-threeds": { "native": true }`, and
 requires. `android/app/src/main/res/xml/network_security_config.xml` allows
 cleartext HTTP only to the local merchant backend.
 
-## Known follow-ups
-
-- The Xcode project (`BT3DSBridgePOC.xcodeproj`/`.xcworkspace`) still carries
-  naming from when this was a POC-comparison app. The bundle identifier,
-  Android package/namespace, Gradle `rootProject.name`, `package.json` name,
-  and `app.json` name/slug were already updated; renaming the Xcode
-  project/scheme/workspace files is cosmetic and left as a follow-up, since it
-  requires hand-editing `project.pbxproj` structure.
-
 ## Running it
 
 Re-run `pod install` under `ios/` after changing `newArchEnabled` if you have

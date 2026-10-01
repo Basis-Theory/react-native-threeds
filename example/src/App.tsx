@@ -145,13 +145,13 @@ const MainScreen: React.FC = () => {
           )}
 
           <View style={styles.identityCard} testID="architecture-identity">
-            <Text style={styles.identityTitle}>Unified consumer example</Text>
+            <Text style={styles.identityTitle}>React Native 3DS Example</Text>
             <Text>Platform: {Platform.OS}</Text>
             <Text testID="active-strategy">Active strategy: {strategy}</Text>
           </View>
 
-          <Text style={styles.rendererLabel}>Choose integration</Text>
-          <View style={styles.rendererSelector}>
+          <Text style={styles.strategyLabel}>Choose integration</Text>
+          <View style={styles.strategySelector}>
             <StrategyOption
               label="Bridge"
               selected={strategy === 'bridge'}
@@ -209,15 +209,15 @@ const StrategyOption: React.FC<StrategyOptionProps> = ({
     onPress={onPress}
     testID={`strategy-${label.toLowerCase()}`}
     style={[
-      styles.rendererOption,
-      selected && styles.rendererOptionSelected,
-      disabled && styles.rendererOptionDisabled,
+      styles.strategyOption,
+      selected && styles.strategyOptionSelected,
+      disabled && styles.strategyOptionDisabled,
     ]}
   >
     <Text
       style={[
-        styles.rendererOptionText,
-        selected && styles.rendererOptionTextSelected,
+        styles.strategyOptionText,
+        selected && styles.strategyOptionTextSelected,
       ]}
     >
       {label}
@@ -257,17 +257,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
   },
-  rendererLabel: {
+  strategyLabel: {
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
   },
-  rendererSelector: {
+  strategySelector: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 20,
   },
-  rendererOption: {
+  strategyOption: {
     alignItems: 'center',
     borderColor: '#94a3b8',
     borderRadius: 8,
@@ -275,18 +275,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
   },
-  rendererOptionDisabled: {
+  strategyOptionDisabled: {
     opacity: 0.45,
   },
-  rendererOptionSelected: {
+  strategyOptionSelected: {
     backgroundColor: '#1d4ed8',
     borderColor: '#1d4ed8',
   },
-  rendererOptionText: {
+  strategyOptionText: {
     color: '#334155',
     fontWeight: '600',
   },
-  rendererOptionTextSelected: {
+  strategyOptionTextSelected: {
     color: '#ffffff',
   },
   nativeStatus: {

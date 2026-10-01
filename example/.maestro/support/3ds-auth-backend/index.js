@@ -8,7 +8,7 @@ const { BasisTheory } = require("@basis-theory/basis-theory-js");
 // from this source file so the private key is always read from this backend.
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
-// This process models the merchant-controlled server in the POC. It is kept
+// This process models the merchant-controlled server. It is kept
 // outside the React Native app so the private API key never crosses the mobile
 // or native bridge boundary.
 var app = express();
@@ -28,7 +28,8 @@ let bt;
   }
 
   bt = await new BasisTheory().init(apiKey, {
-    // The POC uses Basis Theory's internal development environment end-to-end.
+    // The example and its E2E tests run against Basis Theory's development
+    // environment.
     apiBaseUrl: "https://api.flock-dev.com",
   });
 })();

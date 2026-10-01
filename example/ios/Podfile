@@ -20,7 +20,7 @@ platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 
 prepare_react_native_project!
 
-target 'BT3DSBridgePOC' do
+target 'BasisTheoryThreeDSExample' do
   use_expo_modules!
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
@@ -60,19 +60,20 @@ target 'BT3DSBridgePOC' do
       :ccache_enabled => ccache_enabled?(podfile_properties),
     )
 
-    # fmt detects consteval through preprocessor branches that this Xcode's
-    # Clang accepts but cannot compile for React Native's format strings.
-    # Patch the vendored header after each pod installation instead of editing
-    # Pods by hand, because CocoaPods recreates that directory on every install.
+    # Legacy-architecture builds compile fmt from source (new-architecture
+    # builds use React Native's prebuilt dependencies instead). Recent Xcode
+    # Clang versions detect consteval but can't compile React Native's format
+    # strings with it, so disable it in the vendored header after each install;
+    # CocoaPods recreates Pods/ every time.
     fmt_header = File.join(__dir__, 'Pods/fmt/include/fmt/base.h')
     if File.exist?(fmt_header)
       contents = File.read(fmt_header)
       replacement = <<~HEADER
         // Detect consteval, C++20 constexpr extensions and std::is_constant_evaluated.
-        // Patched for this POC's Xcode/Clang compatibility.
+        // Patched by the example Podfile: consteval disabled.
         #define FMT_USE_CONSTEVAL 0
       HEADER
-      unless contents.include?('Patched for this POC')
+      unless contents.include?('Patched by the example Podfile')
         patched = contents.sub(
           /\/\/ Detect consteval.*?\n#if !defined\(__cpp_lib_is_constant_evaluated\).*?\n#endif\n/m,
           replacement,

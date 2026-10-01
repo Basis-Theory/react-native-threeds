@@ -234,9 +234,8 @@ final class BasisTheoryThreeDS: NSObject {
         return dictionary
     }
 
-    /// Allows only the production API and the internal development API used by
-    /// this POC. A productionized configuration could make environments a typed
-    /// enum instead of accepting a free-form string.
+    /// Allows only the production API and Basis Theory's internal development
+    /// API, so JavaScript can't point the SDK at an arbitrary host.
     private func validatedApiHost(_ value: String) throws -> String {
         let normalizedValue = value.contains("://") ? value : "https://\(value)"
         guard

@@ -18,8 +18,8 @@ import okhttp3.Headers
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Handwritten Android NativeModules bridge used only by the legacy comparison.
- * It mirrors the Swift bridge and delegates 3DS behavior to the Android SDK.
+ * Android NativeModules bridge, the only native strategy on Android. It mirrors
+ * the Swift bridge and delegates 3DS behavior to the Android SDK.
  */
 class BasisTheoryThreeDSBridgeModule(
     reactContext: ReactApplicationContext,

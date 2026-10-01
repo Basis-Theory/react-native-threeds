@@ -9,10 +9,8 @@ import type {
 /**
  * Shape exported by the Swift and Kotlin modules through React Native's legacy
  * bridge. Keeping this interface private prevents native implementation
- * details from becoming part of the public SDK contract.
- *
- * The New Architecture comparison replaces this handwritten declaration with
- * a Codegen contract while preserving the same public operations.
+ * details from becoming part of the public SDK contract. The TurboModule
+ * exposes the same operations through the Codegen contract in src/specs.
  */
 interface NativeThreeDSModule {
   configure(configuration: NativeThreeDSConfiguration): Promise<string[]>;

@@ -127,11 +127,11 @@ jobs:
       # running Metro server, which this job never starts. Release embeds the
       # JS bundle in the app. (The native-only ios-threeds/android-threeds
       # workflows this is adapted from have no JS bundle, so they use Debug.)
-      - name: Build BT3DSBridgePOC
+      - name: Build BasisTheoryThreeDSExample
         working-directory: example/ios
         run: |
-          xcrun xcodebuild -workspace BT3DSBridgePOC.xcworkspace \
-            -scheme BT3DSBridgePOC \
+          xcrun xcodebuild -workspace BasisTheoryThreeDSExample.xcworkspace \
+            -scheme BasisTheoryThreeDSExample \
             -configuration Release \
             -sdk iphonesimulator \
             -destination "platform=iOS Simulator,id=${SIMULATOR_UUID}" \
@@ -140,7 +140,7 @@ jobs:
       - name: Install and run Maestro tests
         working-directory: example/ios
         run: |
-          xcrun simctl install "$SIMULATOR_UUID" .build/Build/Products/Release-iphonesimulator/BT3DSBridgePOC.app
+          xcrun simctl install "$SIMULATOR_UUID" .build/Build/Products/Release-iphonesimulator/BasisTheoryThreeDSExample.app
           export MAESTRO_CLI_NO_ANALYTICS=1
           maestro --device "$SIMULATOR_UUID" test -e STRATEGY=${{ matrix.newArch == 'true' && 'turboModule' || 'bridge' }} ../.maestro/tests
 
