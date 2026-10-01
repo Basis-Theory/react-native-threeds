@@ -1,7 +1,5 @@
-import { NativeModules, Platform } from 'react-native';
-import CodegenNativeBasisTheoryThreeDS, {
-  type Spec,
-} from '../specs/NativeBasisTheoryThreeDS';
+import { Platform } from 'react-native';
+import NativeBasisTheoryThreeDS from '../specs/NativeBasisTheoryThreeDS';
 import type {
   CreateNativeThreeDSSessionRequest,
   NativeThreeDSConfiguration,
@@ -11,63 +9,22 @@ import type {
 
 const supportedPlatform = Platform.OS === 'ios' || Platform.OS === 'android';
 
-type TurboModuleProxy = (name: string) => Spec | null;
-
-type ReactNativeRuntimeGlobals = typeof globalThis & {
-  RN$Bridgeless?: boolean;
-  RN$TurboInterop?: boolean;
-  RN$UnifiedNativeModuleProxy?: boolean;
-  __turboModuleProxy?: TurboModuleProxy;
-};
-
-const getNativeBasisTheoryThreeDS = (): Spec | null => {
-  // Read the current proxy as well as Codegen's module result to distinguish
-  // registration failures from a host that did not install JSI.
-  const runtimeGlobals = globalThis as ReactNativeRuntimeGlobals;
-  const turboModuleProxy = runtimeGlobals.__turboModuleProxy;
-  const legacyModule = NativeModules?.NativeBasisTheoryThreeDS as
-    | Spec
-    | null
-    | undefined;
-  const nativeModule =
-    turboModuleProxy?.('NativeBasisTheoryThreeDS') ??
-    legacyModule ??
-    CodegenNativeBasisTheoryThreeDS;
-
-  console.info('[BT3DSTurbo] registry lookup', {
-    available: nativeModule !== null,
-    legacyModuleAvailable: legacyModule != null,
-    legacyModuleRegistered: legacyModule !== undefined,
-    bridgeless: runtimeGlobals.RN$Bridgeless ?? false,
-    turboInterop: runtimeGlobals.RN$TurboInterop ?? false,
-    unifiedNativeModuleProxy:
-      runtimeGlobals.RN$UnifiedNativeModuleProxy ?? false,
-    turboModuleProxyAvailable: turboModuleProxy !== undefined,
-    reactNativeVersion: Platform.constants?.reactNativeVersion,
-  });
-
-  return nativeModule;
-};
-
 /**
  * Consumers can use this flag to keep a WebView fallback available while the
  * generated native projects are being installed or while running on web.
  */
 export const isThreeDSTurboModuleAvailable = (): boolean =>
-  supportedPlatform && getNativeBasisTheoryThreeDS() !== null;
+  supportedPlatform && NativeBasisTheoryThreeDS !== null;
 
 const requireModule = () => {
-  const nativeModule = getNativeBasisTheoryThreeDS();
-  if (!supportedPlatform || nativeModule === null) {
+  if (!supportedPlatform || NativeBasisTheoryThreeDS === null) {
     if (Platform.OS === 'android') {
-      // global.__turboModuleProxy is confirmed absent on Android Bridgeless
-      // hosts even when the Kotlin module registers successfully. This is a
-      // React Native runtime limitation, not a missing install step — use
-      // BasisTheoryThreeDSNative (Bridge) on Android instead.
+      // React Native's Bridgeless runtime does not reach a registered Android
+      // TurboModule, so this package only builds the Bridge on Android.
       throw new Error(
         'NativeBasisTheoryThreeDS (TurboModule) is not reachable on Android. ' +
           'This is a known React Native Bridgeless runtime limitation, not a ' +
-          'missing install step — see the "Native integration" section of the ' +
+          'missing install step; see "Choosing the native strategy" in the ' +
           'README. Use BasisTheoryThreeDSNative (Bridge) on Android instead.'
       );
     }
@@ -77,7 +34,7 @@ const requireModule = () => {
     );
   }
 
-  return nativeModule;
+  return NativeBasisTheoryThreeDS;
 };
 
 /**

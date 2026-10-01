@@ -25,6 +25,6 @@ test('fails fast with an actionable message instead of a silent no-op', () => {
   ).toThrow(/not reachable on Android/);
 
   expect(() => BasisTheoryThreeDSTurbo.startAuthentication('session-id')).toThrow(
-    'Native integration'
+    'Choosing the native strategy'
   );
 });

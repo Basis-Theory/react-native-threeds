@@ -16,13 +16,6 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "kotlinx-serialization"
 apply plugin: "com.facebook.react"
 
-react {
-    // React Native reads codegenConfig from package.json and creates the Java
-    // abstract class that the Kotlin implementation extends.
-    libraryName = "BasisTheoryThreeDSSpec"
-    codegenJavaPackageName = "com.basistheory.reactnativethreeds"
-}
-
 android {
     namespace "com.basistheory.reactnativethreeds"
     compileSdk 35
@@ -39,21 +32,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
-    }
-
-    sourceSets {
-        main {
-            java {
-                // The TurboModule is not reachable from JavaScript on Android
-                // regardless of the architecture flag — Bridgeless hosts do
-                // not expose __turboModuleProxy even when this Kotlin class
-                // registers successfully. Always compile and autolink the
-                // Bridge adapter on Android instead; it runs on new-arch
-                // hosts through React Native's Bridge/TurboModule interop
-                // layer, unlike this repository's TurboModule.
-                exclude "**/BasisTheoryThreeDSTurbo*.kt"
-            }
-        }
     }
 }
 

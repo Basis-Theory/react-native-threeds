@@ -37,5 +37,4 @@ export interface Spec extends TurboModule {
 }
 
 // Codegen requires this canonical declaration to discover the native contract.
-// Runtime lookup is intentionally handled by the facade outside `src/specs`.
 export default TurboModuleRegistry.get<Spec>('NativeBasisTheoryThreeDS');

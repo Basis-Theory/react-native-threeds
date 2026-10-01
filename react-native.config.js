@@ -36,8 +36,8 @@ module.exports = {
     platforms: nativeEnabled
       ? {
           android: {
-            // The package also contains a TurboModule package class that is
-            // never compiled on Android, so name the Bridge package explicitly.
+            // Android only ships the Bridge; see "Choosing the native strategy"
+            // in the README.
             packageImportPath:
               'import com.basistheory.reactnativethreeds.BasisTheoryThreeDSBridgePackage;',
             packageInstance: 'new BasisTheoryThreeDSBridgePackage()',

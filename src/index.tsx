@@ -31,16 +31,12 @@ import {
  * fits their app instead of relying on an implicit platform default.
  *
  * Android only exposes `bridge`: React Native's Bridgeless runtime does not
- * expose `__turboModuleProxy` on Android even when the Kotlin TurboModule
- * registers successfully, regardless of the architecture flag, so there is no
- * supported Android TurboModule integration to offer here (see the
- * investigation in the ENG-12518 branch/PR history). `android/build.gradle`
- * always compiles and autolinks the Bridge adapter on Android for the same
- * reason.
+ * expose `__turboModuleProxy` on Android, so a registered Android TurboModule
+ * is unreachable from JavaScript (see the investigation in ENG-12518). The
+ * package only ships the Bridge adapter on Android.
  *
- * `BasisTheoryThreeDSTurbo` remains available as a direct import (not through
- * this matrix) for anyone investigating the Android TurboModule gap; it still
- * throws the actionable error described above if used there.
+ * `BasisTheoryThreeDSTurbo` is still exported for direct use on iOS; on
+ * Android it throws an actionable error instead of failing silently.
  */
 export const BasisTheoryThreeDSStrategies = {
   ios: {
