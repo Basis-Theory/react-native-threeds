@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 jobs:
   verify:
@@ -220,9 +219,6 @@ jobs:
         # Release embeds the JS bundle (see the iOS build step); the example's
         # release build type is signed with the debug keystore.
         run: ./gradlew assembleRelease
-        env:
-          # Read-only access to the android-threeds GitHub Packages Maven repo.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install and run Maestro tests
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2

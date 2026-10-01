@@ -72,6 +72,43 @@ const Checkout = ({ tokenId }: { tokenId: string }) => {
 };
 ```
 
+### Enabling native 3DS
+
+Native 3DS is off by default, so WebView-only apps build exactly as before: no native code, no extra SDKs, no extra setup. To enable it, add this to your app's `package.json`:
+
+```json
+{
+  "@basis-theory/react-native-threeds": {
+    "native": true
+  }
+}
+```
+
+Then rebuild the app.
+
+- **iOS:** run `pod install`. It downloads Ravelin's 3DS SDK, which the native integration uses. Requires iOS 15 or later.
+- **Android:** Ravelin's 3DS SDK requires [core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring) in your app module, and a library can't enable it for you.
+  - **Expo (`expo prebuild`):** add the config plugin to `app.json` and it's added on every prebuild:
+    ```json
+    { "expo": { "plugins": ["@basis-theory/react-native-threeds"] } }
+    ```
+  - **Bare React Native:** add these lines to `android/app/build.gradle`:
+    ```groovy
+    android {
+        compileOptions {
+            coreLibraryDesugaringEnabled true
+        }
+    }
+
+    dependencies {
+        coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    }
+    ```
+
+  The library adds Ravelin's Maven repository to your build automatically. If your `settings.gradle` sets `repositoriesMode` to `FAIL_ON_PROJECT_REPOS`, add `https://maven.ravelin.com/public/repositories/threeds2service/` to your repositories instead.
+
+Only enable `native` if you use `BasisTheoryThreeDS` or `BasisTheoryThreeDSStrategies`. Desugaring on its own is harmless in a WebView-only app: it adds Google's `desugar_jdk_libs` to the build and doesn't link any native 3DS code.
+
 ### Native
 
 `BasisTheoryThreeDS` uses the TurboModule on iOS when your build compiled it, and the Bridge everywhere else. No provider is needed. The native SDK calls your `authenticationEndpoint` with the session ID and, if the bank requires a challenge, presents it on top of your app.

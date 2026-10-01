@@ -10,14 +10,6 @@ module.exports = {
   dependencies: {
     '@basis-theory/react-native-threeds': {
       root: path.resolve(__dirname, '..'),
-      platforms: {
-        android: {
-          sourceDir: path.resolve(__dirname, '../android'),
-          packageImportPath:
-            'import com.basistheory.reactnativethreeds.BasisTheoryThreeDSBridgePackage;',
-          packageInstance: 'new BasisTheoryThreeDSBridgePackage()',
-        },
-      },
     },
   },
 };

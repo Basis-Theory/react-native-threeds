@@ -10,11 +10,15 @@ appId: com.basistheory.reactnativethreeds.example
 - assertVisible: 'Active strategy: ${STRATEGY}'
 - tapOn:
     id: 'card-number-input'
-- eraseText: 16
+- eraseText
 - inputText: '4264281511112228'
-- hideKeyboard
+# Tapping outside the input closes the numeric keyboard, which has no
+# dismiss key and otherwise covers the Checkout button.
+- tapOn:
+    id: 'architecture-identity'
 - tapOn:
     id: 'checkout-button'
+    retryTapIfNoChange: false
 - extendedWaitUntil:
     visible: '${STRATEGY}: failed'
     timeout: 30000

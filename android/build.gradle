@@ -6,11 +6,14 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20"
+        // The vendored android-threeds sources use kotlinx.serialization.
+        classpath "org.jetbrains.kotlin:kotlin-serialization:2.1.20"
     }
 }
 
 apply plugin: "com.android.library"
 apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "kotlinx-serialization"
 apply plugin: "com.facebook.react"
 
 react {
@@ -54,27 +57,29 @@ android {
     }
 }
 
+def ravelinRepository = "https://maven.ravelin.com/public/repositories/threeds2service/"
+
 repositories {
     google()
     mavenCentral()
-    // com.basistheory:android-threeds depends on Ravelin's public 3DS
-    // artifact. Declaring it here also lets IDE sync resolve the adapter model.
-    maven { url "https://maven.ravelin.com/public/repositories/threeds2service/" }
-    // android-threeds publishes to GitHub Packages (see its own
-    // lib/build.gradle `publishing {}` block) — Maven on GitHub Packages
-    // requires an authenticated token even for a public repo/package.
-    maven {
-        url "https://maven.pkg.github.com/basis-theory/android-threeds"
-        credentials {
-            username = System.getenv("GITHUB_ACTOR") ?: "basis-theory"
-            password = System.getenv("GITHUB_TOKEN")
-        }
+    maven { url ravelinRepository }
+}
+
+// Ravelin's SDK, which the vendored android-threeds sources depend on, is only
+// published to Ravelin's Maven repository. Apps resolve this library's
+// dependencies with their own repositories, so add it to every project rather
+// than asking each app to declare it.
+rootProject.allprojects {
+    repositories {
+        maven { url ravelinRepository }
     }
 }
 
 dependencies {
     implementation "com.facebook.react:react-android"
-    implementation "com.basistheory:android-threeds:1.2.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2"
+    // Dependencies of the vendored android-threeds 1.2.1 sources.
+    implementation "com.ravelin.threeds2service:threeds2service-sdk:2.0.2"
     implementation "com.squareup.okhttp3:okhttp:4.11.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1"
 }

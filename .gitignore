@@ -9,9 +9,8 @@
 .vscode/
 jsconfig.json
 
-# Vendored by BasisTheoryReactNativeThreeDS.podspec's prepare_command
+# Downloaded by BasisTheoryReactNativeThreeDS.podspec's prepare_command
 # (fetched fresh on every `pod install`, never committed)
-.threeds-src/
 Ravelin3DS.xcframework/
 ravelin.zip
 

@@ -2,7 +2,8 @@ const tokenize = async (cardNumber: string) => {
   const tokenBody = {
     type: 'card',
     data: {
-      number: cardNumber,
+      // The Token API rejects separators such as spaces.
+      number: cardNumber.replace(/\D/g, ''),
       expiration_month: 12,
       expiration_year: 2030,
     },
@@ -19,6 +20,11 @@ const tokenize = async (cardNumber: string) => {
     });
 
     const token = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        `Tokenization failed (${response.status}): ${JSON.stringify(token.errors ?? token.detail)}`
+      );
+    }
     return token;
   } catch (e) {
     console.error(e);

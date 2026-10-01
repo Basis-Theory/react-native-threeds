@@ -7,19 +7,42 @@ appId: com.basistheory.reactnativethreeds.example
 - assertVisible: 'Active strategy: ${STRATEGY}'
 - tapOn:
     id: 'card-number-input'
-- eraseText: 16
+- eraseText
 - inputText: '4000020000000000'
-- hideKeyboard
+# Tapping outside the input closes the numeric keyboard, which has no
+# dismiss key and otherwise covers the Checkout button.
+- tapOn:
+    id: 'architecture-identity'
 - tapOn:
     id: 'checkout-button'
+    retryTapIfNoChange: false
 - extendedWaitUntil:
     visible: 'Purchase authentication'
     timeout: 30000
-- tapOn:
-    below: 'Enter your code below'
-- inputText: '1234'
-- tapOn: 'Purchase authentication'
-- tapOn: 'Submit'
+# The challenge screen is native, so its steps follow ios-threeds and
+# android-threeds respectively.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          below: 'Enter your code below'
+      - inputText: '1234'
+      - tapOn: 'Purchase authentication'
+      - tapOn: 'Submit'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: 'dataEntry'
+      - inputText: '1234'
+      # hideKeyboard can't dismiss the keyboard on Ravelin's challenge screen,
+      # and a tap while the field is focused doesn't reach Submit. Tapping the
+      # header clears the focus first, as the iOS steps do.
+      - tapOn: 'Purchase authentication'
+      - tapOn:
+          id: 'submitBtn'
 - extendedWaitUntil:
     visible: '${STRATEGY}: successful'
     timeout: 30000

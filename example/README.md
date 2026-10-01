@@ -24,10 +24,16 @@ app starts on that one and the selector in `src/App.tsx` disables the other.
 | | Bridge | TurboModule |
 | --- | --- | --- |
 | iOS | Works | Works (`ios/Podfile.properties.json` sets `newArchEnabled: true`) |
-| Android | Works | Not exposed — see the "Native integration" section of the root README. `android/gradle.properties` keeps `newArchEnabled=false`; the library's own `android/build.gradle` always compiles the Bridge adapter on Android regardless of this app's architecture flag. |
+| Android | Works | Not exposed — see "Choosing the native strategy" in the root README. `android/gradle.properties` keeps `newArchEnabled=false`; the library's own `android/build.gradle` always compiles the Bridge adapter on Android regardless of this app's architecture flag. |
 
 - Expo 54 (bare workflow, `android/`/`ios/` committed)
 - React Native 0.81.5
+
+Native 3DS is enabled the same way a customer app enables it: `package.json`
+sets `"@basis-theory/react-native-threeds": { "native": true }`, and
+`android/app/build.gradle` enables core library desugaring, which Ravelin's SDK
+requires. `android/app/src/main/res/xml/network_security_config.xml` allows
+cleartext HTTP only to the local merchant backend.
 
 ## Known follow-ups
 

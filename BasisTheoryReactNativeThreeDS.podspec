@@ -31,28 +31,23 @@ Pod::Spec.new do |spec|
     spec.dependency 'React-Core'
   end
 
-  # ThreeDS (github.com/Basis-Theory/ios-threeds) is a pure Swift Package
-  # Manager package — it has no CocoaPods podspec, public or private, so
-  # `spec.dependency 'ThreeDS'` cannot resolve it. Vendor its source and
-  # binary framework directly instead of depending on it as a Pod.
-  #
-  # threeds_tag is the only thing to update by hand when ios-threeds ships a
-  # new release. The Ravelin `.xcframework` URL is read out of that tag's own
-  # Package.swift rather than hardcoded here, so it can never drift out of
-  # sync with whichever ThreeDS version threeds_tag selects.
-  threeds_tag = '1.2.1'
+  # ios-threeds only ships through Swift Package Manager, so its sources are
+  # vendored into ios/ThreeDS by scripts/vendor-threeds.sh and compiled into
+  # this pod. Ravelin's binary SDK is not redistributed: it is downloaded from
+  # Ravelin's release, matching the version ios-threeds pins in Package.swift,
+  # and verified against that checksum.
+  ravelin_url = 'https://ravelin.mycloudrepo.io/public/repositories/threeds2service-ios/release/2.0.0/Ravelin3DS.xcframework.zip'
+  ravelin_sha256 = '6e2c68757ca1c6476156c6c069cfcc04998b017343034b4d30b58e660d62fc83'
 
   spec.prepare_command = <<-CMD
     set -e
-    rm -rf .threeds-src Ravelin3DS.xcframework ravelin.zip
-    git clone --branch #{threeds_tag} --depth 1 https://github.com/Basis-Theory/ios-threeds.git .threeds-src
-    RAVELIN_URL=$(grep -oE 'https://[^"]+\.zip' .threeds-src/ThreeDS/Package.swift | head -1)
-    curl -L -o ravelin.zip "$RAVELIN_URL"
+    rm -rf Ravelin3DS.xcframework ravelin.zip
+    curl -fsSL -o ravelin.zip "#{ravelin_url}"
+    echo "#{ravelin_sha256}  ravelin.zip" | shasum -a 256 -c -
     ditto -x -k ravelin.zip .
     rm -f ravelin.zip
   CMD
 
-  spec.source_files = source_files + ['.threeds-src/ThreeDS/Sources/ThreeDS/*.swift']
+  spec.source_files = source_files + ['ios/ThreeDS/*.swift']
   spec.vendored_frameworks = 'Ravelin3DS.xcframework'
-  spec.preserve_paths = ['.threeds-src/**/*']
 end

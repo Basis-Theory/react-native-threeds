@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Text,
   Pressable,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {
   BasisTheoryThreeDSStrategies,
@@ -60,7 +62,7 @@ const MainScreen: React.FC = () => {
   const [isBusy, setIsBusy] = React.useState<boolean>(false);
   const [strategy, setStrategy] = React.useState<Strategy>(initialStrategy);
   const [cardNumber, setCardNumber] =
-    React.useState<string>('5204247750001471');
+    React.useState<string>('4000020000000000');
   const [nativeStatus, setNativeStatus] =
     React.useState<NativeThreeDSStatus>('initializing');
 
@@ -128,56 +130,60 @@ const MainScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.innerContainer}
-      >
-        {isBusy && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        )}
-
-        <View style={styles.identityCard} testID="architecture-identity">
-          <Text style={styles.identityTitle}>Unified consumer example</Text>
-          <Text>Platform: {Platform.OS}</Text>
-          <Text testID="active-strategy">Active strategy: {strategy}</Text>
-        </View>
-
-        <Text style={styles.rendererLabel}>Choose integration</Text>
-        <View style={styles.rendererSelector}>
-          <StrategyOption
-            label="Bridge"
-            selected={strategy === 'bridge'}
-            disabled={isBusy || !isStrategyAvailable('bridge')}
-            onPress={() => setStrategy('bridge')}
-          />
-          {Platform.OS === 'ios' && (
-            <StrategyOption
-              label="TurboModule"
-              selected={strategy === 'turboModule'}
-              disabled={isBusy || !isStrategyAvailable('turboModule')}
-              onPress={() => setStrategy('turboModule')}
-            />
-          )}
-        </View>
-
-        <CardPicker setCardNumber={setCardNumber} />
-        <CardInput cardNumber={cardNumber} setCardNumber={setCardNumber} />
-        <Text
-          accessibilityLabel="Native 3DS status"
-          testID="native-three-ds-status"
-          style={styles.nativeStatus}
+      {/* The numeric keyboard has no dismiss key, so tapping outside the input
+          closes it. accessible={false} keeps the children visible to
+          assistive tech and to Maestro. */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.innerContainer}
         >
-          {nativeThreeDSStatusText[nativeStatus]}
-        </Text>
-        <Button
-          title="Checkout"
-          testID="checkout-button"
-          disabled={nativeStatus !== 'ready'}
-          onPress={() => void checkout()}
-        />
-      </KeyboardAvoidingView>
+          {isBusy && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
+
+          <View style={styles.identityCard} testID="architecture-identity">
+            <Text style={styles.identityTitle}>Unified consumer example</Text>
+            <Text>Platform: {Platform.OS}</Text>
+            <Text testID="active-strategy">Active strategy: {strategy}</Text>
+          </View>
+
+          <Text style={styles.rendererLabel}>Choose integration</Text>
+          <View style={styles.rendererSelector}>
+            <StrategyOption
+              label="Bridge"
+              selected={strategy === 'bridge'}
+              disabled={isBusy || !isStrategyAvailable('bridge')}
+              onPress={() => setStrategy('bridge')}
+            />
+            {Platform.OS === 'ios' && (
+              <StrategyOption
+                label="TurboModule"
+                selected={strategy === 'turboModule'}
+                disabled={isBusy || !isStrategyAvailable('turboModule')}
+                onPress={() => setStrategy('turboModule')}
+              />
+            )}
+          </View>
+
+          <CardPicker setCardNumber={setCardNumber} />
+          <CardInput cardNumber={cardNumber} setCardNumber={setCardNumber} />
+          <Text
+            testID="native-three-ds-status"
+            style={styles.nativeStatus}
+          >
+            {nativeThreeDSStatusText[nativeStatus]}
+          </Text>
+          <Button
+            title="Checkout"
+            testID="checkout-button"
+            disabled={nativeStatus !== 'ready'}
+            onPress={() => void checkout()}
+          />
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
       <Toast />
     </SafeAreaView>
   );

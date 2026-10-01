@@ -136,6 +136,7 @@ android {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
     compileOptions {
+        // Required by Ravelin's 3DS SDK (used by @basis-theory/react-native-threeds).
         coreLibraryDesugaringEnabled true
     }
 }

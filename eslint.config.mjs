@@ -14,12 +14,11 @@ export default typescriptEslint.config(
       'dist/*',
       'node_modules/*',
       'example/*',
-      // Vendored by BasisTheoryReactNativeThreeDS.podspec's prepare_command
-      // (fetched fresh on every `pod install`, gitignored, never authored here).
-      '.threeds-src/*',
       'jest.config.js',
       'eslint.config.mjs',
       'babel.config.js',
+      'react-native.config.js',
+      'app.plugin.js',
       'prepare.js',
       'bump.js',
     ],

@@ -1,11 +1,15 @@
 [
   {
-    "cardNumber": "5204247750001471",
-    "title": "Successful Frictionless Authentication"
+    "cardNumber": "4000020000000000",
+    "title": "Successful Challenge Authentication"
   },
   {
     "cardNumber": "4111111111111111",
     "title": "Authentication Attempted"
+  },
+  {
+    "cardNumber": "5204247750001471",
+    "title": "Successful Frictionless Authentication"
   },
   {
     "cardNumber": "4264281511112228",
@@ -18,10 +22,6 @@
   {
     "cardNumber": "5405001111111116",
     "title": "Authentication Rejected"
-  },
-  {
-    "cardNumber": "4000020000000000",
-    "title": "Successful Challenge Authentication"
   },
   {
     "cardNumber": "4005562231212123",
