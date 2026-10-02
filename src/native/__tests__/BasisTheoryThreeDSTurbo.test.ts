@@ -72,6 +72,21 @@ test('rejects an ambiguous session request before native code', async () => {
   expect(mockCreateSession).not.toHaveBeenCalled();
 });
 
+test('treats a blank token reference as missing', async () => {
+  const session = { id: 'session-id', cardBrand: 'visa' };
+  mockCreateSession.mockResolvedValue(session);
+
+  await expect(
+    BasisTheoryThreeDSTurbo.createSession({
+      tokenId: '',
+      tokenIntentId: 'token-intent-id',
+    })
+  ).resolves.toEqual(session);
+  await expect(
+    BasisTheoryThreeDSTurbo.createSession({ tokenId: '' })
+  ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
+});
+
 test('starts authentication with a session identifier', async () => {
   const result = { id: 'session-id', status: 'successful' };
   mockStartAuthentication.mockResolvedValue(result);

@@ -1,7 +1,5 @@
-// TurboModule reachability is confirmed absent on Android Bridgeless hosts
-// even when the Kotlin module registers successfully. This suite pins the
-// resulting JavaScript contract: a clear, actionable error instead of a
-// silent no-op.
+// This package doesn't build an Android TurboModule. This suite pins the
+// JavaScript contract: a clear, actionable error instead of a silent no-op.
 jest.mock('react-native', () => ({
   Platform: { OS: 'android' },
   TurboModuleRegistry: { get: () => null },
@@ -22,9 +20,9 @@ test('fails fast with an actionable message instead of a silent no-op', () => {
       apiKey: 'public-api-key',
       authenticationEndpoint: 'http://localhost:3333/3ds/authenticate',
     })
-  ).toThrow(/not reachable on Android/);
+  ).toThrow('The Android TurboModule is not supported in this package');
 
   expect(() => BasisTheoryThreeDSTurbo.startAuthentication('session-id')).toThrow(
-    'Choosing the native strategy'
+    'use BasisTheoryThreeDSNative (Bridge) on Android'
   );
 });

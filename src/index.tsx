@@ -30,10 +30,9 @@ import {
  * Explicit per-platform integration matrix. Consumers pick the strategy that
  * fits their app instead of relying on an implicit platform default.
  *
- * Android only exposes `bridge`: React Native's Bridgeless runtime does not
- * expose `__turboModuleProxy` on Android, so a registered Android TurboModule
- * is unreachable from JavaScript (see the investigation in ENG-12518). The
- * package only ships the Bridge adapter on Android.
+ * iOS always compiles the Bridge and adds the TurboModule on the new
+ * architecture. Android only ships the Bridge: the Android TurboModule isn't
+ * supported in this package.
  *
  * `BasisTheoryThreeDSTurbo` is still exported for direct use on iOS; on
  * Android it throws an actionable error instead of failing silently.
@@ -52,8 +51,7 @@ export const BasisTheoryThreeDSStrategies = {
  * Convenience default for consumers who don't want to branch on `Platform`
  * themselves. Prefers the TurboModule on iOS when the client's build actually
  * compiled it (`isThreeDSTurboModuleAvailable()`); falls back to Bridge
- * everywhere else, including all of Android, where TurboModule is not
- * reachable regardless of the architecture flag.
+ * everywhere else, including all of Android.
  *
  * This is evaluated once at import time because native module availability
  * cannot change during the app's lifetime — it was decided at compile time.

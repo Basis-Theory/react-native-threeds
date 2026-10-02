@@ -13,21 +13,22 @@ Pod::Spec.new do |spec|
   spec.source       = { :git => package['repository']['url'], :tag => spec.version.to_s }
   spec.swift_version = '5.9'
 
+  # The Bridge is compiled on both architectures; the new architecture runs it
+  # through React Native's interop layer, as on Android.
+  source_files = [
+    'ios/BasisTheoryThreeDSBridge.m',
+    'ios/BasisTheoryThreeDS.swift',
+  ]
+
   if ENV['RCT_NEW_ARCH_ENABLED'] == '1'
-    # The TurboModule host compiles the Codegen adapter and its Swift
+    # The new architecture adds the Codegen TurboModule and its Swift
     # implementation. Codegen supplies NativeBasisTheoryThreeDSSpec.
-    source_files = [
+    source_files += [
       'ios/BasisTheoryThreeDSTurbo.{h,mm}',
       'ios/BasisTheoryThreeDSSwift.swift',
     ]
     install_modules_dependencies(spec)
   else
-    # RN 0.74 does not need generated bindings. Compile only the handwritten
-    # Bridge registration and implementation against React-Core.
-    source_files = [
-      'ios/BasisTheoryThreeDSBridge.m',
-      'ios/BasisTheoryThreeDS.swift',
-    ]
     spec.dependency 'React-Core'
   end
 
@@ -39,13 +40,21 @@ Pod::Spec.new do |spec|
   ravelin_url = 'https://ravelin.mycloudrepo.io/public/repositories/threeds2service-ios/release/2.0.0/Ravelin3DS.xcframework.zip'
   ravelin_sha256 = '6e2c68757ca1c6476156c6c069cfcc04998b017343034b4d30b58e660d62fc83'
 
+  # CocoaPods runs this on every `pod install` for path pods, which is how apps
+  # install this one from node_modules. The stamp records the verified
+  # checksum, so an unchanged Ravelin isn't downloaded again.
   spec.prepare_command = <<-CMD
     set -e
-    rm -rf Ravelin3DS.xcframework ravelin.zip
+    stamp=.ravelin3ds.sha256
+    if [ -d Ravelin3DS.xcframework ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "#{ravelin_sha256}" ]; then
+      exit 0
+    fi
+    rm -rf Ravelin3DS.xcframework ravelin.zip "$stamp"
     curl -fsSL -o ravelin.zip "#{ravelin_url}"
     echo "#{ravelin_sha256}  ravelin.zip" | shasum -a 256 -c -
     ditto -x -k ravelin.zip .
     rm -f ravelin.zip
+    echo "#{ravelin_sha256}" > "$stamp"
   CMD
 
   spec.source_files = source_files + ['ios/ThreeDS/*.swift']

@@ -146,14 +146,14 @@ const Checkout = ({ tokenId }: { tokenId: string }) => {
 
 A failed or cancelled challenge resolves with `status: 'failed'` and the reason in `result.details`. The promise only rejects on configuration, transport, or SDK errors.
 
-To force one strategy, use `BasisTheoryThreeDSStrategies.ios.bridge`, `BasisTheoryThreeDSStrategies.ios.turboModule`, or `BasisTheoryThreeDSStrategies.android.bridge`. They expose the same methods. The strategy you pick must be the one your build compiled; check with `isThreeDSTurboModuleAvailable()` or `isNativeThreeDSAvailable`.
+To force one strategy, use `BasisTheoryThreeDSStrategies.ios.bridge`, `BasisTheoryThreeDSStrategies.ios.turboModule`, or `BasisTheoryThreeDSStrategies.android.bridge`. They expose the same methods. `ios.turboModule` needs a build with the new architecture; check with `isThreeDSTurboModuleAvailable()`.
 
 ### Choosing the native strategy
 
-Each build compiles exactly one native adapter:
+The Bridge is always compiled. The TurboModule is added on iOS builds with the new architecture:
 
-- **iOS:** `newArchEnabled` in `ios/Podfile.properties.json` (or `RCT_NEW_ARCH_ENABLED=1 pod install`). `true` compiles the TurboModule and `false` compiles the Bridge. Run `pod install` again after changing it.
-- **Android:** nothing to configure. The Bridge is always compiled, because React Native's Bridgeless runtime does not reach a registered Android TurboModule.
+- **iOS:** `newArchEnabled` in `ios/Podfile.properties.json` (or `RCT_NEW_ARCH_ENABLED=1 pod install`). `true` compiles the TurboModule alongside the Bridge, and `false` compiles only the Bridge. Run `pod install` again after changing it.
+- **Android:** nothing to configure. Only the Bridge is compiled; the Android TurboModule isn't supported in this package.
 
 Tested with React Native 0.81.5 (see [`example/`](example)).
 

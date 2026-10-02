@@ -6,6 +6,10 @@ import type {
   NativeThreeDSResult,
   ThreeDSSession,
 } from '../types';
+import {
+  hasExactlyOneTokenReference,
+  TOKEN_REFERENCE_ERROR,
+} from './tokenReference';
 
 const supportedPlatform = Platform.OS === 'ios' || Platform.OS === 'android';
 
@@ -19,13 +23,10 @@ export const isThreeDSTurboModuleAvailable = (): boolean =>
 const requireModule = () => {
   if (!supportedPlatform || NativeBasisTheoryThreeDS === null) {
     if (Platform.OS === 'android') {
-      // React Native's Bridgeless runtime does not reach a registered Android
-      // TurboModule, so this package only builds the Bridge on Android.
+      // This package only builds the Bridge on Android.
       throw new Error(
-        'NativeBasisTheoryThreeDS (TurboModule) is not reachable on Android. ' +
-          'This is a known React Native Bridgeless runtime limitation, not a ' +
-          'missing install step; see "Choosing the native strategy" in the ' +
-          'README. Use BasisTheoryThreeDSNative (Bridge) on Android instead.'
+        'The Android TurboModule is not supported in this package; use ' +
+          'BasisTheoryThreeDSNative (Bridge) on Android.'
       );
     }
 
@@ -53,13 +54,8 @@ export const BasisTheoryThreeDSTurbo = {
     ),
 
   createSession: (request: CreateNativeThreeDSSessionRequest) => {
-    const hasTokenId = Boolean(request.tokenId);
-    const hasTokenIntentId = Boolean(request.tokenIntentId);
-
-    if (hasTokenId === hasTokenIntentId) {
-      return Promise.reject(
-        new Error('Provide exactly one of tokenId or tokenIntentId.')
-      );
+    if (!hasExactlyOneTokenReference(request)) {
+      return Promise.reject(new Error(TOKEN_REFERENCE_ERROR));
     }
 
     return requireModule().createSession(

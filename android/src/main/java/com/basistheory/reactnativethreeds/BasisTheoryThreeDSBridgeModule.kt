@@ -24,10 +24,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 class BasisTheoryThreeDSBridgeModule(
     reactContext: ReactApplicationContext,
 ) : ReactContextBaseJavaModule(reactContext) {
+    // React methods arrive on the native-modules thread, so every read and write
+    // of the state below happens inside `scope`, on Main.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var service: ThreeDSService? = null
+
+    // The SDK holds one transaction. A new session replaces an unauthenticated
+    // one, but nothing starts while a session is being created or authenticated.
     private var activeSessionId: String? = null
     private var isCreatingSession = false
+    private var isAuthenticating = false
 
     override fun getName() = NAME
 
@@ -58,6 +64,11 @@ class BasisTheoryThreeDSBridgeModule(
 
             val configuredService = builder.build()
             scope.launch {
+                if (isSessionInProgress()) {
+                    rejectSessionInProgress(promise)
+                    return@launch
+                }
+
                 runCatching { configuredService.initialize() }
                     .onSuccess { warnings ->
                         service = configuredService
@@ -74,16 +85,6 @@ class BasisTheoryThreeDSBridgeModule(
 
     @ReactMethod
     fun createSession(request: ReadableMap, promise: Promise) {
-        val configuredService = service
-        if (configuredService == null) {
-            promise.reject("NOT_CONFIGURED", "Call configure before createSession.")
-            return
-        }
-        if (activeSessionId != null || isCreatingSession) {
-            promise.reject("SESSION_IN_PROGRESS", "Complete the active 3DS session first.")
-            return
-        }
-
         val tokenId = request.optionalString("tokenId")
         val tokenIntentId = request.optionalString("tokenIntentId")
         if ((tokenId == null) == (tokenIntentId == null)) {
@@ -91,10 +92,21 @@ class BasisTheoryThreeDSBridgeModule(
             return
         }
 
-        // The SDK supports one active transaction. Mark the asynchronous creation
-        // immediately so two fast JavaScript calls cannot create competing sessions.
-        isCreatingSession = true
         scope.launch {
+            val configuredService = service
+            if (configuredService == null) {
+                promise.reject("NOT_CONFIGURED", "Call configure before createSession.")
+                return@launch
+            }
+            if (isSessionInProgress()) {
+                rejectSessionInProgress(promise)
+                return@launch
+            }
+
+            // A session that was never authenticated, for example after the user
+            // left checkout, is replaced by this one.
+            isCreatingSession = true
+            activeSessionId = null
             runCatching { requireNotNull(configuredService.createSession(tokenId, tokenIntentId)) }
                 .onSuccess { session ->
                     isCreatingSession = false
@@ -119,23 +131,28 @@ class BasisTheoryThreeDSBridgeModule(
 
     @ReactMethod
     fun startAuthentication(sessionId: String, promise: Promise) {
-        val configuredService = service
-        val activity = reactApplicationContext.currentActivity
-        if (configuredService == null) {
-            promise.reject("NOT_CONFIGURED", "Call configure before startAuthentication.")
-            return
-        }
-        if (activeSessionId != sessionId) {
-            promise.reject("INVALID_SESSION", "The session is not active in the Android SDK.")
-            return
-        }
-        if (activity == null) {
-            promise.reject("NO_ACTIVITY", "A foreground Android Activity is required.")
-            return
-        }
-
-        val settled = AtomicBoolean(false)
         scope.launch {
+            val configuredService = service
+            val activity = reactApplicationContext.currentActivity
+            if (configuredService == null) {
+                promise.reject("NOT_CONFIGURED", "Call configure before startAuthentication.")
+                return@launch
+            }
+            if (activeSessionId != sessionId) {
+                promise.reject("INVALID_SESSION", "The session is not active in the Android SDK.")
+                return@launch
+            }
+            if (isAuthenticating) {
+                rejectSessionInProgress(promise)
+                return@launch
+            }
+            if (activity == null) {
+                promise.reject("NO_ACTIVITY", "A foreground Android Activity is required.")
+                return@launch
+            }
+
+            isAuthenticating = true
+            val settled = AtomicBoolean(false)
             runCatching {
                 configuredService.startChallenge(
                     sessionId,
@@ -145,7 +162,7 @@ class BasisTheoryThreeDSBridgeModule(
                 )
             }.onFailure {
                 if (settled.compareAndSet(false, true)) {
-                    activeSessionId = null
+                    finishAuthentication()
                     promise.reject("AUTHENTICATION_FAILED", it.message, it)
                 }
             }
@@ -157,12 +174,24 @@ class BasisTheoryThreeDSBridgeModule(
         service = null
         activeSessionId = null
         isCreatingSession = false
+        isAuthenticating = false
         super.invalidate()
+    }
+
+    private fun isSessionInProgress() = isCreatingSession || isAuthenticating
+
+    private fun rejectSessionInProgress(promise: Promise) =
+        promise.reject("SESSION_IN_PROGRESS", "Wait for the active 3DS session to finish first.")
+
+    private fun finishAuthentication() {
+        activeSessionId = null
+        isAuthenticating = false
     }
 
     private fun resolveOnce(promise: Promise, settled: AtomicBoolean, result: ChallengeResponse) {
         if (!settled.compareAndSet(false, true)) return
-        activeSessionId = null
+        // The SDK may call back off Main; the state change must happen on Main.
+        scope.launch { finishAuthentication() }
         promise.resolve(
             Arguments.createMap().apply {
                 putString("id", result.id)

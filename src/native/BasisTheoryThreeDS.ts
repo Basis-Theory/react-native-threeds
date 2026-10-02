@@ -5,6 +5,10 @@ import type {
   NativeThreeDSResult,
   ThreeDSSession,
 } from '../types';
+import {
+  hasExactlyOneTokenReference,
+  TOKEN_REFERENCE_ERROR,
+} from './tokenReference';
 
 /**
  * Shape exported by the Swift and Kotlin modules through React Native's legacy
@@ -59,13 +63,8 @@ export const BasisTheoryThreeDSNative = {
   ): Promise<ThreeDSSession> {
     // Exactly one reference identifies the card while keeping raw PAN data out
     // of this native API.
-    const hasTokenId = request.tokenId != null;
-    const hasTokenIntentId = request.tokenIntentId != null;
-
-    if (hasTokenId === hasTokenIntentId) {
-      return Promise.reject(
-        new Error('Provide either tokenId or tokenIntentId, but not both.')
-      );
+    if (!hasExactlyOneTokenReference(request)) {
+      return Promise.reject(new Error(TOKEN_REFERENCE_ERROR));
     }
 
     return requireNativeModule().createSession(request);

@@ -1,10 +1,6 @@
 appId: com.basistheory.reactnativethreeds.example
 ---
-- launchApp
-- extendedWaitUntil:
-    visible: 'Native 3DS ready'
-    timeout: 60000
-- assertVisible: 'Active strategy: ${STRATEGY}'
+- runFlow: ../support/flows/SelectStrategy.yaml
 - tapOn:
     id: 'card-number-input'
 - eraseText

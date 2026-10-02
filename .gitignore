@@ -10,9 +10,10 @@
 jsconfig.json
 
 # Downloaded by BasisTheoryReactNativeThreeDS.podspec's prepare_command
-# (fetched fresh on every `pod install`, never committed)
+# (fetched on `pod install` when missing or changed, never committed)
 Ravelin3DS.xcframework/
 ravelin.zip
+.ravelin3ds.sha256
 
 # Xcode
 #

@@ -49,8 +49,8 @@ const isStrategyAvailable = (strategy: Strategy): boolean =>
     ? isNativeThreeDSAvailable
     : isThreeDSTurboModuleAvailable();
 
-// A build compiles exactly one adapter, chosen by the host's architecture
-// flag, so start on whichever one this binary actually contains.
+// Start on the strategy BasisTheoryThreeDS would pick: the TurboModule on iOS
+// builds with the new architecture, the Bridge everywhere else.
 const initialStrategy: Strategy =
   Platform.OS === 'ios' && isStrategyAvailable('turboModule')
     ? 'turboModule'
@@ -96,20 +96,42 @@ const MainScreen: React.FC = () => {
       });
   }, [strategy]);
 
+  const createSession = async (): Promise<ThreeDSSession> => {
+    const token = await tokenize(cardNumber);
+
+    if (!token) {
+      throw new Error('Unable to create a token.');
+    }
+
+    return strategyModule(strategy).createSession({ tokenId: token.id });
+  };
+
+  // Creates a session and never authenticates it, like a user who leaves
+  // checkout. The next checkout must still succeed.
+  const abandonSession = async () => {
+    try {
+      setIsBusy(true);
+      await createSession();
+      Toast.show({ type: 'info', text1: 'Session abandoned' });
+    } catch (error) {
+      console.error(error);
+      Toast.show({
+        type: 'error',
+        text1: '3DS failed',
+        text2: error instanceof Error ? error.message : 'Unknown error',
+      });
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   const checkout = async () => {
     try {
       setIsBusy(true);
-      const token = await tokenize(cardNumber);
-
-      if (!token) {
-        throw new Error('Unable to create a token.');
-      }
-
-      const threeDS = strategyModule(strategy);
-      const session: ThreeDSSession = await threeDS.createSession({
-        tokenId: token.id,
-      });
-      const result = await threeDS.startAuthentication(session.id);
+      const session = await createSession();
+      const result = await strategyModule(strategy).startAuthentication(
+        session.id
+      );
 
       Toast.show({
         type: result.status === 'successful' ? 'success' : 'info',
@@ -154,6 +176,7 @@ const MainScreen: React.FC = () => {
           <View style={styles.strategySelector}>
             <StrategyOption
               label="Bridge"
+              strategy="bridge"
               selected={strategy === 'bridge'}
               disabled={isBusy || !isStrategyAvailable('bridge')}
               onPress={() => setStrategy('bridge')}
@@ -161,6 +184,7 @@ const MainScreen: React.FC = () => {
             {Platform.OS === 'ios' && (
               <StrategyOption
                 label="TurboModule"
+                strategy="turboModule"
                 selected={strategy === 'turboModule'}
                 disabled={isBusy || !isStrategyAvailable('turboModule')}
                 onPress={() => setStrategy('turboModule')}
@@ -182,6 +206,12 @@ const MainScreen: React.FC = () => {
             disabled={nativeStatus !== 'ready'}
             onPress={() => void checkout()}
           />
+          <Button
+            title="Abandon a session"
+            testID="abandon-session-button"
+            disabled={nativeStatus !== 'ready'}
+            onPress={() => void abandonSession()}
+          />
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
       <Toast />
@@ -191,6 +221,7 @@ const MainScreen: React.FC = () => {
 
 type StrategyOptionProps = {
   label: string;
+  strategy: Strategy;
   selected: boolean;
   disabled: boolean;
   onPress: () => void;
@@ -198,6 +229,7 @@ type StrategyOptionProps = {
 
 const StrategyOption: React.FC<StrategyOptionProps> = ({
   label,
+  strategy,
   selected,
   disabled,
   onPress,
@@ -207,7 +239,7 @@ const StrategyOption: React.FC<StrategyOptionProps> = ({
     accessibilityState={{ checked: selected, disabled }}
     disabled={disabled}
     onPress={onPress}
-    testID={`strategy-${label.toLowerCase()}`}
+    testID={`strategy-${strategy}`}
     style={[
       styles.strategyOption,
       selected && styles.strategyOptionSelected,

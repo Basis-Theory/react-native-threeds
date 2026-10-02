@@ -16,15 +16,16 @@ BasisTheoryThreeDSStrategies.ios.turboModule
 BasisTheoryThreeDSStrategies.android.bridge
 ```
 
-A build compiles exactly one adapter, chosen by the architecture flag, so the
-app starts on that one and the selector in `src/App.tsx` disables the other.
+The Bridge is always compiled, and iOS builds with the new architecture add the
+TurboModule. The app starts on the strategy `BasisTheoryThreeDS` would pick, and
+the selector in `src/App.tsx` disables any strategy the build doesn't include.
 
 ## Per-platform status
 
 | | Bridge | TurboModule |
 | --- | --- | --- |
-| iOS | Works | Works (`ios/Podfile.properties.json` sets `newArchEnabled: true`) |
-| Android | Works | Not exposed — see "Choosing the native strategy" in the root README. `android/gradle.properties` keeps `newArchEnabled=false`; the library's own `android/build.gradle` always compiles the Bridge adapter on Android regardless of this app's architecture flag. |
+| iOS | Works on both architectures | Works with `newArchEnabled: true` in `ios/Podfile.properties.json` |
+| Android | Works on both architectures | Not supported. The library's `android/build.gradle` only compiles the Bridge, whatever this app's architecture flag. |
 
 - Expo 54 (bare workflow, `android/`/`ios/` committed)
 - React Native 0.81.5
@@ -40,10 +41,9 @@ cleartext HTTP only to the local merchant backend.
 Re-run `pod install` under `ios/` after changing `newArchEnabled` if you have
 not already.
 
-The Maestro flows in `.maestro/tests` need the strategy the build compiled,
-so each run passes it explicitly and asserts it:
+Each Maestro run selects one strategy and asserts it:
 
 ```sh
 maestro test -e STRATEGY=turboModule .maestro/tests  # iOS, newArchEnabled true
-maestro test -e STRATEGY=bridge .maestro/tests       # iOS legacy, or Android
+maestro test -e STRATEGY=bridge .maestro/tests       # iOS (either architecture) or Android
 ```

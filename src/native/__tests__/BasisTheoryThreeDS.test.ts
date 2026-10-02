@@ -61,8 +61,23 @@ test('rejects ambiguous native session input', async () => {
       tokenId: 'token-id',
       tokenIntentId: 'token-intent-id',
     })
-  ).rejects.toThrow('Provide either tokenId or tokenIntentId, but not both.');
+  ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
   expect(createSession).not.toHaveBeenCalled();
+});
+
+test('treats a blank token reference as missing', async () => {
+  const session = { id: 'session-id', cardBrand: 'visa' };
+  createSession.mockResolvedValue(session);
+
+  await expect(
+    BasisTheoryThreeDSNative.createSession({
+      tokenId: '',
+      tokenIntentId: 'token-intent-id',
+    })
+  ).resolves.toEqual(session);
+  await expect(
+    BasisTheoryThreeDSNative.createSession({ tokenId: '' })
+  ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
 });
 
 test('starts native authentication', async () => {

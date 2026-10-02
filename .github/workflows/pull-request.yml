@@ -38,11 +38,11 @@ jobs:
           SKIP_INSTALL: 1 # install with cache was done already
 
   ios-e2e:
-    # iOS compiles a different adapter per architecture (Bridge vs.
-    # TurboModule, chosen by the podspec's RCT_NEW_ARCH_ENABLED branch), so
-    # both legs run. Android needs no matrix: android/build.gradle always
-    # compiles the Bridge adapter regardless of newArchEnabled.
-    name: iOS E2E (${{ matrix.newArch == 'true' && 'TurboModule' || 'Bridge' }})
+    # iOS always compiles the Bridge and adds the TurboModule on the new
+    # architecture (the podspec's RCT_NEW_ARCH_ENABLED branch), so the new
+    # architecture leg tests both strategies and the legacy leg tests the
+    # Bridge. Android needs no matrix: it only compiles the Bridge.
+    name: iOS E2E (${{ matrix.newArch == 'true' && 'new architecture' || 'legacy architecture' }})
     runs-on: macOS-15-xlarge
     environment: PR
     strategy:
@@ -142,7 +142,9 @@ jobs:
         run: |
           xcrun simctl install "$SIMULATOR_UUID" .build/Build/Products/Release-iphonesimulator/BasisTheoryThreeDSExample.app
           export MAESTRO_CLI_NO_ANALYTICS=1
-          maestro --device "$SIMULATOR_UUID" test -e STRATEGY=${{ matrix.newArch == 'true' && 'turboModule' || 'bridge' }} ../.maestro/tests
+          for strategy in ${{ matrix.newArch == 'true' && 'turboModule bridge' || 'bridge' }}; do
+            maestro --device "$SIMULATOR_UUID" test -e STRATEGY="$strategy" ../.maestro/tests
+          done
 
   android-e2e:
     name: Android E2E (Bridge, new architecture, R8)

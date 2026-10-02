@@ -18,14 +18,14 @@ final class BasisTheoryThreeDS: NSObject {
     /// session can be created.
     private var service: ThreeDSService?
 
-    /// Guards the iOS SDK's current single-transaction model. A production API
-    /// could replace this with an explicit state machine if the SDK later
-    /// supports concurrent transactions or cancellation.
+    /// The session the SDK's single transaction belongs to. A new session
+    /// replaces it until its authentication starts.
     private var activeSessionId: String?
 
-    /// Covers the short asynchronous window before the SDK returns a session
-    /// identifier, when `activeSessionId` alone cannot reject duplicate calls.
+    /// The iOS SDK holds one transaction, so a new session or configuration
+    /// waits while one is being created or authenticated.
     private var isCreatingSession = false
+    private var isAuthenticating = false
 
     /// React Native creates this module on the main queue because it eventually
     /// interacts with UIKit to present the native challenge.
@@ -69,6 +69,11 @@ final class BasisTheoryThreeDS: NSObject {
         let locale = configuration["locale"] as? String
         let sandbox = configuration["sandbox"] as? Bool ?? false
         let apiBaseUrl = configuration["apiBaseUrl"] as? String
+
+        guard !isCreatingSession, !isAuthenticating else {
+            reject("SESSION_IN_PROGRESS", "Wait for the active 3DS session to finish first.", nil)
+            return
+        }
 
         // The SDK initialization is asynchronous, but the resulting service and
         // React Native promise are coordinated on the main actor.
@@ -133,13 +138,13 @@ final class BasisTheoryThreeDS: NSObject {
             return
         }
 
-        guard activeSessionId == nil, !isCreatingSession else {
-            reject("SESSION_IN_PROGRESS", "Complete the active 3DS session first.", nil)
+        guard !isCreatingSession, !isAuthenticating else {
+            reject("SESSION_IN_PROGRESS", "Wait for the active 3DS session to finish first.", nil)
             return
         }
 
-        let tokenId = request["tokenId"] as? String
-        let tokenIntentId = request["tokenIntentId"] as? String
+        let tokenId = (request["tokenId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let tokenIntentId = (request["tokenIntentId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
 
         // XOR ensures the caller supplies exactly one supported card reference.
         guard (tokenId == nil) != (tokenIntentId == nil) else {
@@ -151,15 +156,16 @@ final class BasisTheoryThreeDS: NSObject {
             return
         }
 
+        // A session that was never authenticated, for example after the user
+        // left checkout, is replaced by this one.
         isCreatingSession = true
+        activeSessionId = nil
         Task { @MainActor in
             do {
                 let session = try await service.createSession(
                     tokenId: tokenId,
                     tokenIntentId: tokenIntentId
                 )
-                // Keep the native transaction paired with the session returned
-                // to JavaScript. The current iOS SDK stores only one transaction.
                 self.isCreatingSession = false
                 self.activeSessionId = session.id
                 resolve([
@@ -193,35 +199,46 @@ final class BasisTheoryThreeDS: NSObject {
             return
         }
 
-        Task { @MainActor in
-            // Resolving the presented controller at call time avoids retaining
-            // a stale controller across React Native navigation changes.
-            guard let viewController = RCTPresentedViewController() else {
-                reject("NO_VIEW_CONTROLLER", "Unable to present the native 3DS challenge.", nil)
-                return
-            }
+        guard !isAuthenticating else {
+            reject("SESSION_IN_PROGRESS", "Wait for the active 3DS session to finish first.", nil)
+            return
+        }
 
+        // Resolving the presented controller at call time avoids retaining
+        // a stale controller across React Native navigation changes.
+        guard let viewController = RCTPresentedViewController() else {
+            reject("NO_VIEW_CONTROLLER", "Unable to present the native 3DS challenge.", nil)
+            return
+        }
+
+        isAuthenticating = true
+        Task { @MainActor in
             do {
                 try await service.startChallenge(
                     sessionId: sessionId,
                     viewController: viewController,
                     onCompleted: { result in
-                        self.activeSessionId = nil
+                        self.finishAuthentication()
                         resolve(self.dictionary(from: result))
                     },
                     onFailure: { result in
                         // Challenge failures are valid 3DS outcomes, so return
                         // them to JavaScript. Promise rejection is reserved for
                         // bridge, transport, or SDK execution errors.
-                        self.activeSessionId = nil
+                        self.finishAuthentication()
                         resolve(self.dictionary(from: result))
                     }
                 )
             } catch {
-                self.activeSessionId = nil
+                self.finishAuthentication()
                 reject("AUTHENTICATION_FAILED", error.localizedDescription, error)
             }
         }
+    }
+
+    private func finishAuthentication() {
+        activeSessionId = nil
+        isAuthenticating = false
     }
 
     /// Converts the SDK value type into JSON-compatible primitives understood
