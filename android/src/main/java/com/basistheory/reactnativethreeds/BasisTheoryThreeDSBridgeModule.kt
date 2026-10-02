@@ -88,7 +88,7 @@ class BasisTheoryThreeDSBridgeModule(
         val tokenId = request.optionalString("tokenId")
         val tokenIntentId = request.optionalString("tokenIntentId")
         if ((tokenId == null) == (tokenIntentId == null)) {
-            promise.reject("INVALID_REQUEST", "Provide exactly one of tokenId or tokenIntentId.")
+            promise.reject("INVALID_SESSION_REQUEST", "Provide exactly one of tokenId or tokenIntentId.")
             return
         }
 

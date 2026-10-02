@@ -70,6 +70,17 @@ final class BasisTheoryThreeDS: NSObject {
         let sandbox = configuration["sandbox"] as? Bool ?? false
         let apiBaseUrl = configuration["apiBaseUrl"] as? String
 
+        // The iOS SDK accepts a host rather than a complete URL. Restricting the
+        // host prevents arbitrary endpoints from being introduced through
+        // JavaScript configuration.
+        let apiHost: String?
+        do {
+            apiHost = try apiBaseUrl.map(self.validatedApiHost)
+        } catch {
+            reject("INVALID_CONFIGURATION", error.localizedDescription, error)
+            return
+        }
+
         guard !isCreatingSession, !isAuthenticating else {
             reject("SESSION_IN_PROGRESS", "Wait for the active 3DS session to finish first.", nil)
             return
@@ -94,14 +105,8 @@ final class BasisTheoryThreeDS: NSObject {
                     builder.withSandbox()
                 }
 
-                if let apiBaseUrl {
-                    // The iOS SDK accepts a host rather than a complete URL.
-                    // Restricting the host prevents arbitrary endpoints from
-                    // being introduced through JavaScript configuration.
-                    let apiHost = try self.validatedApiHost(apiBaseUrl)
-                    if apiHost == "api.flock-dev.com" {
-                        builder.withBaseUrl(apiHost)
-                    }
+                if apiHost == "api.flock-dev.com" {
+                    builder.withBaseUrl("api.flock-dev.com")
                 }
 
                 let service = try builder.build()
@@ -150,7 +155,7 @@ final class BasisTheoryThreeDS: NSObject {
         guard (tokenId == nil) != (tokenIntentId == nil) else {
             reject(
                 "INVALID_SESSION_REQUEST",
-                "Provide either tokenId or tokenIntentId, but not both.",
+                "Provide exactly one of tokenId or tokenIntentId.",
                 nil
             )
             return
