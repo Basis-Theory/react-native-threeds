@@ -145,7 +145,7 @@ const Checkout = ({ tokenId }: { tokenId: string }) => {
 };
 ```
 
-A failed or cancelled challenge resolves with `status: 'failed'` and the reason in `result.details`. `decoupled_challenge` means the issuer authenticates outside your app, so get the outcome with [Get Challenge Result](https://developers.basistheory.com/docs/api/3ds/sessions#get-challenge-result); `informational` means authentication wasn't requested. The promise only rejects on configuration, transport, or SDK errors.
+A failed or cancelled challenge resolves with `status: 'failed'` and the reason in `result.details`. `decoupled_challenge` means the issuer authenticates outside your app: subscribe to the `3ds.session.decoupled-challenge-notification` webhook to learn when it completes, then get the outcome from your backend with [Get Challenge Result](https://developers.basistheory.com/docs/api/3ds/sessions#get-challenge-result); `informational` means authentication wasn't requested. The promise only rejects on configuration, transport, or SDK errors.
 
 To force one strategy, use `BasisTheoryThreeDSStrategies.ios.bridge`, `BasisTheoryThreeDSStrategies.ios.turboModule`, or `BasisTheoryThreeDSStrategies.android.bridge`. They expose the same methods. `ios.turboModule` needs a build with the new architecture; check with `isThreeDSTurboModuleAvailable()`.
 

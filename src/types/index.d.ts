@@ -47,8 +47,10 @@ interface CreateNativeThreeDSSessionRequest {
  * native adapters map EMV transaction status codes (Y, A, N, U, R) to these
  * names. A cancelled, timed-out, or failed challenge resolves as `'failed'`,
  * with the reason in `NativeThreeDSResult.details`. `'decoupled_challenge'`
- * means the issuer authenticates outside the app, so get the outcome from Get
- * Challenge Result; `'informational'` means authentication wasn't requested.
+ * means the issuer authenticates outside the app: wait for the
+ * `3ds.session.decoupled-challenge-notification` webhook, then get the outcome
+ * from Get Challenge Result. `'informational'` means authentication wasn't
+ * requested.
  */
 type ThreeDSAuthenticationStatus =
   | 'successful'
