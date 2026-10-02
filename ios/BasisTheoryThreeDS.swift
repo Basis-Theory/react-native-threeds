@@ -51,25 +51,21 @@ final class BasisTheoryThreeDS: NSObject {
         resolver resolve: @escaping RCTPromiseResolveBlock,
         rejecter reject: @escaping RCTPromiseRejectBlock
     ) {
-        guard let apiKey = configuration["apiKey"] as? String, !apiKey.isEmpty else {
+        guard let apiKey = nonBlank(configuration["apiKey"]) else {
             reject("INVALID_CONFIGURATION", "apiKey is required.", nil)
             return
         }
 
-        guard
-            let authenticationEndpoint = configuration["authenticationEndpoint"] as? String,
-            !authenticationEndpoint.isEmpty
-        else {
+        guard let authenticationEndpoint = nonBlank(configuration["authenticationEndpoint"]) else {
             reject("INVALID_CONFIGURATION", "authenticationEndpoint is required.", nil)
             return
         }
 
         let authenticationEndpointHeaders =
             configuration["authenticationEndpointHeaders"] as? [String: String] ?? [:]
-        // Blank strings count as missing, as on Android and the TurboModule.
-        let locale = (configuration["locale"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let locale = nonBlank(configuration["locale"])
         let sandbox = configuration["sandbox"] as? Bool ?? false
-        let apiBaseUrl = (configuration["apiBaseUrl"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let apiBaseUrl = nonBlank(configuration["apiBaseUrl"])
 
         // The iOS SDK accepts a host rather than a complete URL. Restricting the
         // host prevents arbitrary endpoints from being introduced through
@@ -149,8 +145,8 @@ final class BasisTheoryThreeDS: NSObject {
             return
         }
 
-        let tokenId = (request["tokenId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
-        let tokenIntentId = (request["tokenIntentId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let tokenId = nonBlank(request["tokenId"])
+        let tokenIntentId = nonBlank(request["tokenIntentId"])
 
         // XOR ensures the caller supplies exactly one supported card reference.
         guard (tokenId == nil) != (tokenIntentId == nil) else {
@@ -290,6 +286,18 @@ final class BasisTheoryThreeDS: NSObject {
 
         return host
     }
+}
+
+/// Blank and whitespace-only strings count as missing, as on Android.
+private func nonBlank(_ value: Any?) -> String? {
+    guard
+        let string = value as? String,
+        !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    else {
+        return nil
+    }
+
+    return string
 }
 
 private enum NativeThreeDSError: LocalizedError {

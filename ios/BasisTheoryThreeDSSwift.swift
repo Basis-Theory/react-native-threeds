@@ -36,12 +36,12 @@ public final class BasisTheoryThreeDSSwift: NSObject {
         resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
-        guard !apiKey.isEmpty else {
+        guard nonBlank(apiKey) != nil else {
             reject("INVALID_CONFIGURATION", "apiKey is required.", nil)
             return
         }
 
-        guard !authenticationEndpoint.isEmpty else {
+        guard nonBlank(authenticationEndpoint) != nil else {
             reject("INVALID_CONFIGURATION", "authenticationEndpoint is required.", nil)
             return
         }
@@ -61,7 +61,7 @@ public final class BasisTheoryThreeDSSwift: NSObject {
         // JavaScript configuration.
         let apiHost: String?
         do {
-            apiHost = apiBaseUrl.isEmpty ? nil : try self.validatedApiHost(apiBaseUrl)
+            apiHost = try nonBlank(apiBaseUrl).map(self.validatedApiHost)
         } catch {
             reject("INVALID_CONFIGURATION", error.localizedDescription, error)
             return
@@ -83,7 +83,7 @@ public final class BasisTheoryThreeDSSwift: NSObject {
                         authenticationEndpointHeaders
                     )
 
-                if !locale.isEmpty {
+                if let locale = nonBlank(locale) {
                     builder.withLocale(locale)
                 }
 
@@ -134,8 +134,8 @@ public final class BasisTheoryThreeDSSwift: NSObject {
             return
         }
 
-        let tokenId = tokenIdValue.isEmpty ? nil : tokenIdValue
-        let tokenIntentId = tokenIntentIdValue.isEmpty ? nil : tokenIntentIdValue
+        let tokenId = nonBlank(tokenIdValue)
+        let tokenIntentId = nonBlank(tokenIntentIdValue)
 
         // XOR ensures the caller supplies exactly one supported card reference.
         guard (tokenId == nil) != (tokenIntentId == nil) else {
@@ -286,6 +286,18 @@ public final class BasisTheoryThreeDSSwift: NSObject {
 
         return headers
     }
+}
+
+/// Blank and whitespace-only strings count as missing, as on Android.
+private func nonBlank(_ value: Any?) -> String? {
+    guard
+        let string = value as? String,
+        !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    else {
+        return nil
+    }
+
+    return string
 }
 
 private enum NativeThreeDSError: LocalizedError {

@@ -87,6 +87,21 @@ test('treats a blank token reference as missing', async () => {
   ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
 });
 
+test('treats a whitespace-only token reference as missing', async () => {
+  const session = { id: 'session-id', cardBrand: 'visa' };
+  mockCreateSession.mockResolvedValue(session);
+
+  await expect(
+    BasisTheoryThreeDSTurbo.createSession({
+      tokenId: '   ',
+      tokenIntentId: 'token-intent-id',
+    })
+  ).resolves.toEqual(session);
+  await expect(
+    BasisTheoryThreeDSTurbo.createSession({ tokenId: '   ' })
+  ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
+});
+
 test('starts authentication with a session identifier', async () => {
   const result = { id: 'session-id', status: 'successful' };
   mockStartAuthentication.mockResolvedValue(result);

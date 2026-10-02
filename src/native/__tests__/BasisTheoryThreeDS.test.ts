@@ -80,6 +80,21 @@ test('treats a blank token reference as missing', async () => {
   ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
 });
 
+test('treats a whitespace-only token reference as missing', async () => {
+  const session = { id: 'session-id', cardBrand: 'visa' };
+  createSession.mockResolvedValue(session);
+
+  await expect(
+    BasisTheoryThreeDSNative.createSession({
+      tokenId: '   ',
+      tokenIntentId: 'token-intent-id',
+    })
+  ).resolves.toEqual(session);
+  await expect(
+    BasisTheoryThreeDSNative.createSession({ tokenId: '   ' })
+  ).rejects.toThrow('Provide exactly one of tokenId or tokenIntentId.');
+});
+
 test('starts native authentication', async () => {
   const result = { id: 'session-id', status: 'successful' };
   startAuthentication.mockResolvedValue(result);
