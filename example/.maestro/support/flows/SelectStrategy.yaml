@@ -1,0 +1,14 @@
+appId: com.basistheory.reactnativethreeds.example
+---
+# iOS builds with the new architecture compile both strategies and start on
+# the TurboModule, so select the one under test and wait for it to configure.
+- launchApp
+- extendedWaitUntil:
+    visible: 'Native 3DS ready'
+    timeout: 60000
+- tapOn:
+    id: 'strategy-${STRATEGY}'
+- extendedWaitUntil:
+    visible: 'Native 3DS ready'
+    timeout: 60000
+- assertVisible: 'Active strategy: ${STRATEGY}'

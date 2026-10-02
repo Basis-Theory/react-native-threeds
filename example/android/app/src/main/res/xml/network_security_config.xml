@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The example's merchant backend (example/.maestro/support/3ds-auth-backend)
+  runs locally over plain HTTP, and Android blocks cleartext traffic by default
+  since API 28. Release builds, which CI and Maestro use, would otherwise fail
+  every authentication with "CLEARTEXT communication to 10.0.2.2 not
+  permitted". Cleartext is allowed only for the emulator's host loopback
+  (10.0.2.2) and localhost; everything else still requires TLS.
+
+  Production apps don't need this: their authenticationEndpoint is their own
+  HTTPS backend.
+-->
+<network-security-config>
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="false">10.0.2.2</domain>
+    <domain includeSubdomains="false">localhost</domain>
+  </domain-config>
+</network-security-config>

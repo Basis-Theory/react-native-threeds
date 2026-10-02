@@ -1,0 +1,21 @@
+appId: com.basistheory.reactnativethreeds.example
+---
+# Sandbox card 4264281511112228 ("Authentication Failed") drives the SDK to
+# the 'failed' status without a challenge UI, so this doesn't need to guess
+# at the native challenge screen's layout.
+- runFlow: ../support/flows/SelectStrategy.yaml
+- tapOn:
+    id: 'card-number-input'
+- eraseText
+- inputText: '4264281511112228'
+# Tapping outside the input closes the numeric keyboard, which has no
+# dismiss key and otherwise covers the Checkout button.
+- tapOn:
+    id: 'architecture-identity'
+- tapOn:
+    id: 'checkout-button'
+    retryTapIfNoChange: false
+- extendedWaitUntil:
+    visible: '${STRATEGY}: failed'
+    timeout: 30000
+- stopApp

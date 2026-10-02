@@ -10,19 +10,16 @@ export const CardInput: React.FC<Props> = ({ cardNumber, setCardNumber }) => {
   return (
     <View style={styles.inputContainer}>
       <TextInput
+        accessibilityLabel="Card number"
+        testID="card-number-input"
         style={styles.input}
         placeholder="Enter Card Number"
         keyboardType="numeric"
         maxLength={19}
         value={cardNumber}
-        onChangeText={(text) => {
-          // formatting the card number as "XXXX XXXX XXXX XXXX"
-          const formatted = text
-            .replace(/\D/g, '')
-            .replace(/(.{4})/g, '$1 ')
-            .trim();
-          setCardNumber(formatted);
-        }}
+        // Reformatting on every keystroke moves the cursor while Maestro types,
+        // which scrambles the digits, so the value is kept exactly as typed.
+        onChangeText={setCardNumber}
       />
     </View>
   );

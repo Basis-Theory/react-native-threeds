@@ -1,0 +1,64 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20"
+        // The vendored android-threeds sources use kotlinx.serialization.
+        classpath "org.jetbrains.kotlin:kotlin-serialization:2.1.20"
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "kotlinx-serialization"
+apply plugin: "com.facebook.react"
+
+android {
+    namespace "com.basistheory.reactnativethreeds"
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 35
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+def ravelinRepository = "https://maven.ravelin.com/public/repositories/threeds2service/"
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url ravelinRepository }
+}
+
+// Ravelin's SDK, which the vendored android-threeds sources depend on, is only
+// published to Ravelin's Maven repository. Apps resolve this library's
+// dependencies with their own repositories, so add it to every project rather
+// than asking each app to declare it.
+rootProject.allprojects {
+    repositories {
+        maven { url ravelinRepository }
+    }
+}
+
+dependencies {
+    implementation "com.facebook.react:react-android"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2"
+    // Dependencies of the vendored android-threeds 1.2.1 sources.
+    implementation "com.ravelin.threeds2service:threeds2service-sdk:2.0.2"
+    implementation "com.squareup.okhttp3:okhttp:4.11.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1"
+}

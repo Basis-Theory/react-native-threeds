@@ -17,8 +17,10 @@ export default typescriptEslint.config(
       'jest.config.js',
       'eslint.config.mjs',
       'babel.config.js',
+      'react-native.config.js',
+      'app.plugin.js',
       'prepare.js',
-      'bump.js'
+      'bump.js',
     ],
   },
   js.configs.recommended,

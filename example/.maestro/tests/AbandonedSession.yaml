@@ -1,0 +1,26 @@
+appId: com.basistheory.reactnativethreeds.example
+---
+# A session that is created but never authenticated, as when a user leaves
+# checkout, must not block the next checkout.
+- runFlow: ../support/flows/SelectStrategy.yaml
+- tapOn:
+    id: 'card-number-input'
+- eraseText
+- inputText: '4264281511112228'
+# Tapping outside the input closes the numeric keyboard, which has no
+# dismiss key and otherwise covers the buttons.
+- tapOn:
+    id: 'architecture-identity'
+- tapOn:
+    id: 'abandon-session-button'
+    retryTapIfNoChange: false
+- extendedWaitUntil:
+    visible: 'Session abandoned'
+    timeout: 30000
+- tapOn:
+    id: 'checkout-button'
+    retryTapIfNoChange: false
+- extendedWaitUntil:
+    visible: '${STRATEGY}: failed'
+    timeout: 30000
+- stopApp

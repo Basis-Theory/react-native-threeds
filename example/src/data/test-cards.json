@@ -1,66 +1,66 @@
 [
   {
-    "cardNumber": "4200000000000002",
-    "title": "Successful Frictionless Authentication"
-  },
-  {
-    "cardNumber": "4200000000000003",
-    "title": "Authentication Attempted"
-  },
-  {
-    "cardNumber": "4200000000000005",
-    "title": "Authentication Failed"
-  },
-  {
-    "cardNumber": "4200000000000006",
-    "title": "Authentication Unavailable"
-  },
-  {
-    "cardNumber": "4200000000000007",
-    "title": "Authentication Rejected"
-  },
-  {
-    "cardNumber": "4200000000000004",
+    "cardNumber": "4000020000000000",
     "title": "Successful Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000014",
+    "cardNumber": "4111111111111111",
+    "title": "Authentication Attempted"
+  },
+  {
+    "cardNumber": "5204247750001471",
+    "title": "Successful Frictionless Authentication"
+  },
+  {
+    "cardNumber": "4264281511112228",
+    "title": "Authentication Failed"
+  },
+  {
+    "cardNumber": "5405001111111165",
+    "title": "Authentication Unavailable"
+  },
+  {
+    "cardNumber": "5405001111111116",
+    "title": "Authentication Rejected"
+  },
+  {
+    "cardNumber": "4005562231212123",
     "title": "Successful Challenge Authentication - Method not Required"
   },
   {
-    "cardNumber": "4200000000000015",
+    "cardNumber": "4761369980320253",
     "title": "Successful Mandated Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000016",
+    "cardNumber": "4000000000000341",
     "title": "Successful Out-of-Band Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000008",
+    "cardNumber": "4005571701111111",
     "title": "Attempted Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000009",
+    "cardNumber": "4055011111111111",
     "title": "Failed Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000017",
+    "cardNumber": "6011361011110004",
     "title": "Failed Out of Band Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000010",
+    "cardNumber": "6011361000008888",
     "title": "Unavailable Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000011",
+    "cardNumber": "6011361000001115",
     "title": "Rejected Challenge Authentication"
   },
   {
-    "cardNumber": "4200000000000012",
+    "cardNumber": "4264281500003339",
     "title": "3DS Directory Server Error"
   },
   {
-    "cardNumber": "4200000000000013",
+    "cardNumber": "4264281500001119",
     "title": "Internal 3DS Server Error"
   }
 ]

@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [master, release]
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ${{ matrix.os }}
@@ -17,15 +20,15 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPM_RO_TOKEN }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node }}
 
       - name: Install deps (with cache)
-        uses: bahmutov/npm-install@v1
+        uses: bahmutov/npm-install@20216767ca67f0f7b4d095dc5859c5700a6581cb # v1
         with:
           install-command: yarn --immutable
 
@@ -33,3 +36,206 @@ jobs:
         run: make verify
         env:
           SKIP_INSTALL: 1 # install with cache was done already
+
+  ios-e2e:
+    # iOS always compiles the Bridge and adds the TurboModule on the new
+    # architecture (the podspec's RCT_NEW_ARCH_ENABLED branch), so the new
+    # architecture leg tests both strategies and the legacy leg tests the
+    # Bridge. Android needs no matrix: it only compiles the Bridge.
+    name: iOS E2E (${{ matrix.newArch == 'true' && 'new architecture' || 'legacy architecture' }})
+    runs-on: macOS-15-xlarge
+    environment: PR
+    strategy:
+      fail-fast: false
+      matrix:
+        newArch: ['true', 'false']
+    steps:
+      # Secrets are passed through `env:` and scoped to the steps that need
+      # them. Never print their names or values.
+      - name: Check secrets
+        run: |
+          if [ -z "$BT_API_KEY_PUB" ] || [ -z "$BT_API_KEY_PVT" ]; then
+            echo "::error::Missing secret"
+            exit 1
+          fi
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Checkout repo
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20.x'
+
+      - name: Install JS deps
+        run: yarn --immutable
+
+      - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
+        with:
+          xcode-version: 'latest-stable'
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Configure example env
+        run: |
+          {
+            grep -v '^PUBLIC_API_KEY=' example/.env.example
+            printf 'PUBLIC_API_KEY=%s\n' "$BT_API_KEY_PUB"
+          } > example/.env
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
+
+      - name: Select architecture
+        working-directory: example/ios
+        run: |
+          sed -i '' 's/"newArchEnabled": "[a-z]*"/"newArchEnabled": "${{ matrix.newArch }}"/' Podfile.properties.json
+          grep '"newArchEnabled": "${{ matrix.newArch }}"' Podfile.properties.json
+
+      - name: Install Pods
+        working-directory: example/ios
+        run: pod install
+
+      # Dependencies come from the root workspace install, so no install
+      # scripts run with the private key in the environment.
+      - name: Start merchant backend
+        working-directory: example/.maestro/support/3ds-auth-backend
+        run: yarn start > /dev/null 2>&1 &
+        env:
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Wait for merchant backend
+        run: |
+          for _ in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:3333 && exit 0
+            sleep 1
+          done
+          echo "::error::Merchant backend did not start"
+          exit 1
+
+      - name: Boot Simulator
+        run: |
+          SIMULATOR_UUID=$(xcrun simctl list devices available | grep -E '^\s+iPhone' | grep -oE '[0-9A-F-]{36}' | head -n 1)
+          echo "SIMULATOR_UUID=$SIMULATOR_UUID" >> "$GITHUB_ENV"
+          xcrun simctl bootstatus "$SIMULATOR_UUID" -b
+
+      # Release, not Debug: a Debug React Native build loads its JS from a
+      # running Metro server, which this job never starts. Release embeds the
+      # JS bundle in the app. (The native-only ios-threeds/android-threeds
+      # workflows this is adapted from have no JS bundle, so they use Debug.)
+      - name: Build BasisTheoryThreeDSExample
+        working-directory: example/ios
+        run: |
+          xcrun xcodebuild -workspace BasisTheoryThreeDSExample.xcworkspace \
+            -scheme BasisTheoryThreeDSExample \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=${SIMULATOR_UUID}" \
+            -derivedDataPath .build
+
+      - name: Install and run Maestro tests
+        working-directory: example/ios
+        run: |
+          xcrun simctl install "$SIMULATOR_UUID" .build/Build/Products/Release-iphonesimulator/BasisTheoryThreeDSExample.app
+          export MAESTRO_CLI_NO_ANALYTICS=1
+          for strategy in ${{ matrix.newArch == 'true' && 'turboModule bridge' || 'bridge' }}; do
+            maestro --device "$SIMULATOR_UUID" test -e STRATEGY="$strategy" ../.maestro/tests
+          done
+
+  android-e2e:
+    name: Android E2E (Bridge, new architecture, R8)
+    runs-on: ubuntu-latest-16-cores
+    environment: PR
+    steps:
+      - name: Check secrets
+        run: |
+          if [ -z "$BT_API_KEY_PUB" ] || [ -z "$BT_API_KEY_PVT" ]; then
+            echo "::error::Missing secret"
+            exit 1
+          fi
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Checkout repo
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20.x'
+
+      - name: Install JS deps
+        run: yarn --immutable
+
+      - name: Setup JDK
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Configure example env
+        run: |
+          {
+            grep -v -e '^PUBLIC_API_KEY=' -e '^AUTHENTICATION_ENDPOINT=' example/.env.example
+            printf 'PUBLIC_API_KEY=%s\n' "$BT_API_KEY_PUB"
+            echo 'AUTHENTICATION_ENDPOINT=http://10.0.2.2:3333/3ds/authenticate'
+          } > example/.env
+        env:
+          BT_API_KEY_PUB: ${{ secrets.BT_API_KEY_PUB }}
+
+      # Dependencies come from the root workspace install, so no install
+      # scripts run with the private key in the environment.
+      - name: Start merchant backend
+        working-directory: example/.maestro/support/3ds-auth-backend
+        run: yarn start > /dev/null 2>&1 &
+        env:
+          BT_API_KEY_PVT: ${{ secrets.BT_API_KEY_PVT }}
+
+      - name: Wait for merchant backend
+        run: |
+          for _ in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:3333 && exit 0
+            sleep 1
+          done
+          echo "::error::Merchant backend did not start"
+          exit 1
+
+      - name: Enable KVM group perms for hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build example app
+        working-directory: example/android
+        # Release embeds the JS bundle (see the iOS build step); the example's
+        # release build type is signed with the debug keystore. Built like a
+        # production app: new architecture on and minified with R8, so the
+        # Bridge runs through React Native's interop layer and the library's
+        # consumer R8 rules are exercised.
+        run: ./gradlew assembleRelease -PnewArchEnabled=true -Pandroid.enableMinifyInReleaseBuilds=true
+
+      - name: Install and run Maestro tests
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          profile: pixel_7
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            adb install example/android/app/build/outputs/apk/release/app-release.apk
+            export MAESTRO_CLI_NO_ANALYTICS=1
+            maestro test -e STRATEGY=bridge example/.maestro/tests

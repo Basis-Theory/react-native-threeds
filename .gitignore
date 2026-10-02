@@ -9,6 +9,12 @@
 .vscode/
 jsconfig.json
 
+# Downloaded by BasisTheoryReactNativeThreeDS.podspec's prepare_command
+# (fetched on `pod install` when missing or changed, never committed)
+Ravelin3DS.xcframework/
+ravelin.zip
+.ravelin3ds.sha256
+
 # Xcode
 #
 build/
@@ -40,9 +46,10 @@ project.xcworkspace
 local.properties
 android.iml
 
-# Cocoapods
+# CocoaPods
 #
 example/ios/Pods
+example/ios/Podfile.lock
 
 # Ruby
 example/vendor/
@@ -83,3 +90,12 @@ android/generated
 
 # Env
 .env
+example/.env
+example/.maestro/support/3ds-auth-backend/.env
+
+# Generated native application state
+example/android/.gradle/
+example/android/.idea/
+example/android/**/build/
+example/android/local.properties
+example/ios/.xcode.env.local

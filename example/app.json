@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "example",
-    "slug": "example",
+    "name": "React Native 3DS Example",
+    "slug": "react-native-threeds-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,17 +13,18 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "3dsreactnative.example"
+      "bundleIdentifier": "com.basistheory.reactnativethreeds.example"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "3dsreactnative.example"
+      "package": "com.basistheory.reactnativethreeds.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "newArchEnabled": false
   }
 }

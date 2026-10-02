@@ -1,6 +1,6 @@
 import { Picker } from '@react-native-picker/picker';
 import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import testCards from '../data/test-cards.json';
 
 interface Props {
@@ -8,7 +8,14 @@ interface Props {
 }
 
 export const CardPicker: React.FC<Props> = ({ setCardNumber }) => {
-  const [selectedCard, setSelectedCard] = React.useState<string>('');
+  const [selectedCard, setSelectedCard] = React.useState<string>(
+    testCards[0]?.cardNumber ?? '',
+  );
+
+  const selectCard = (cardNumber: string) => {
+    setSelectedCard(cardNumber);
+    setCardNumber(cardNumber);
+  };
 
   return (
     <View>
@@ -17,7 +24,7 @@ export const CardPicker: React.FC<Props> = ({ setCardNumber }) => {
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedCard}
-          onValueChange={(itemValue, _) => setSelectedCard(itemValue)}
+          onValueChange={selectCard}
           mode="dropdown"
         >
           {testCards.map((item, index) => (
@@ -28,14 +35,6 @@ export const CardPicker: React.FC<Props> = ({ setCardNumber }) => {
             />
           ))}
         </Picker>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Set Card Number"
-          onPress={() => setCardNumber(selectedCard)}
-          color="#841584"
-        />
       </View>
     </View>
   );
@@ -53,9 +52,5 @@ const styles = StyleSheet.create({
     borderColor: '#666',
     borderRadius: 5,
     backgroundColor: '#fff',
-  },
-  buttonContainer: {
-    marginTop: 10,
-    marginBottom: 10,
   },
 });
