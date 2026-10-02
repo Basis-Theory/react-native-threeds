@@ -15,8 +15,8 @@ export type NativeThreeDSResult = {
 
 /**
  * Codegen treats this interface as the build-time contract between JavaScript
- * and both native platforms. The configuration is flattened into supported
- * primitive values so the generated iOS and Android signatures stay stable.
+ * and the iOS TurboModule. The configuration is flattened into supported
+ * primitive values so the generated signatures stay stable.
  */
 export interface Spec extends TurboModule {
   configure(
