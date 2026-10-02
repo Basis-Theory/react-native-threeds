@@ -152,7 +152,7 @@ To force one strategy, use `BasisTheoryThreeDSStrategies.ios.bridge`, `BasisTheo
 
 The Bridge is always compiled. The TurboModule is added on iOS builds with the new architecture:
 
-- **iOS:** `newArchEnabled` in `ios/Podfile.properties.json` (or `RCT_NEW_ARCH_ENABLED=1 pod install`). `true` compiles the TurboModule alongside the Bridge, and `false` compiles only the Bridge. Run `pod install` again after changing it.
+- **iOS:** on React Native 0.82 and later, the TurboModule is always compiled. On 0.81, `newArchEnabled` chooses: in `app.json` for Expo, or in `ios/Podfile.properties.json` for bare apps (or `RCT_NEW_ARCH_ENABLED=1 pod install`). `true` compiles the TurboModule alongside the Bridge, and `false` compiles only the Bridge. Run `pod install` again after changing it.
 - **Android:** nothing to configure. Only the Bridge is compiled; the Android TurboModule isn't supported in this package.
 
 Tested with React Native 0.81.5 (see [`example/`](example)).
