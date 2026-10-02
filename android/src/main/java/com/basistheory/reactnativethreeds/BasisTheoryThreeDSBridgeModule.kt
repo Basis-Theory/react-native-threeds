@@ -195,11 +195,17 @@ class BasisTheoryThreeDSBridgeModule(
         promise.resolve(
             Arguments.createMap().apply {
                 putString("id", result.id)
-                putString("status", result.status)
+                putString("status", publicStatus(result.status))
                 result.details?.let { putString("details", it) }
             },
         )
     }
+
+    // The SDK returns the API status unchanged when there's no challenge, and
+    // "challenge" when the challenge can't start. Unknown values count as
+    // failed, so JavaScript only sees ThreeDSAuthenticationStatus values.
+    private fun publicStatus(status: String): String =
+        status.takeIf { it in PUBLIC_STATUSES } ?: "failed"
 
     private fun headersFromMap(values: ReadableMap?): Headers = Headers.Builder().apply {
         values?.keySetIterator()?.let { keys ->
@@ -229,5 +235,15 @@ class BasisTheoryThreeDSBridgeModule(
 
     companion object {
         const val NAME = "BasisTheoryThreeDS"
+
+        private val PUBLIC_STATUSES = setOf(
+            "successful",
+            "attempted",
+            "failed",
+            "unavailable",
+            "rejected",
+            "decoupled_challenge",
+            "informational",
+        )
     }
 }

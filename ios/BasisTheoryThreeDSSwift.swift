@@ -245,10 +245,15 @@ public final class BasisTheoryThreeDSSwift: NSObject {
         return dictionary
     }
 
-    /// The iOS SDK returns the raw EMV status ("N") for cancelled, timed-out,
-    /// and errored challenges, while every other path and the Android SDK
-    /// return `ThreeDSAuthenticationStatus` names.
+    /// Maps every status the SDK returns to a `ThreeDSAuthenticationStatus`.
+    /// The iOS SDK returns the raw EMV "N" for cancelled, timed-out, and
+    /// errored challenges, and both SDKs return "challenge" when the challenge
+    /// can't start. Unknown values also count as failed.
     private func publicStatus(_ status: String) -> String {
+        let publicStatuses: Set = [
+            "successful", "attempted", "failed", "unavailable", "rejected",
+            "decoupled_challenge", "informational",
+        ]
         let emvStatuses = [
             "Y": "successful",
             "A": "attempted",
@@ -257,7 +262,11 @@ public final class BasisTheoryThreeDSSwift: NSObject {
             "R": "rejected",
         ]
 
-        return emvStatuses[status] ?? status
+        if publicStatuses.contains(status) {
+            return status
+        }
+
+        return emvStatuses[status] ?? "failed"
     }
 
     /// Allows only the production API and Basis Theory's internal development
