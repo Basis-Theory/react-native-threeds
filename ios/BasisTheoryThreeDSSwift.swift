@@ -87,12 +87,17 @@ public final class BasisTheoryThreeDSSwift: NSObject {
 
                 let service = try builder.build()
                 try await service.initialize { warnings in
-                    // Publish the service only after the underlying Ravelin SDK
-                    // invokes its initialization callback.
+                    // The iOS SDK reports a failed Ravelin initialization as nil
+                    // warnings instead of throwing.
+                    guard let warnings else {
+                        reject("INITIALIZATION_FAILED", "The native 3DS SDK failed to initialize.", nil)
+                        return
+                    }
+
                     self.service = service
                     self.activeSessionId = nil
                     self.isCreatingSession = false
-                    resolve(warnings?.map(\.message) ?? [])
+                    resolve(warnings.map(\.message))
                 }
             } catch {
                 reject("INITIALIZATION_FAILED", error.localizedDescription, error)
@@ -208,7 +213,7 @@ public final class BasisTheoryThreeDSSwift: NSObject {
     private func dictionary(from result: ChallengeResponse) -> [String: Any] {
         var dictionary: [String: Any] = [
             "id": result.id,
-            "status": result.status,
+            "status": publicStatus(result.status),
         ]
 
         if let details = result.details {
@@ -216,6 +221,21 @@ public final class BasisTheoryThreeDSSwift: NSObject {
         }
 
         return dictionary
+    }
+
+    /// The iOS SDK returns the raw EMV status ("N") for cancelled, timed-out,
+    /// and errored challenges, while every other path and the Android SDK
+    /// return `ThreeDSAuthenticationStatus` names.
+    private func publicStatus(_ status: String) -> String {
+        let emvStatuses = [
+            "Y": "successful",
+            "A": "attempted",
+            "N": "failed",
+            "U": "unavailable",
+            "R": "rejected",
+        ]
+
+        return emvStatuses[status] ?? status
     }
 
     /// Allows only the production API and Basis Theory's internal development
