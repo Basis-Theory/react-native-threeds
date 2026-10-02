@@ -66,9 +66,10 @@ final class BasisTheoryThreeDS: NSObject {
 
         let authenticationEndpointHeaders =
             configuration["authenticationEndpointHeaders"] as? [String: String] ?? [:]
-        let locale = configuration["locale"] as? String
+        // Blank strings count as missing, as on Android and the TurboModule.
+        let locale = (configuration["locale"] as? String).flatMap { $0.isEmpty ? nil : $0 }
         let sandbox = configuration["sandbox"] as? Bool ?? false
-        let apiBaseUrl = configuration["apiBaseUrl"] as? String
+        let apiBaseUrl = (configuration["apiBaseUrl"] as? String).flatMap { $0.isEmpty ? nil : $0 }
 
         // The iOS SDK accepts a host rather than a complete URL. Restricting the
         // host prevents arbitrary endpoints from being introduced through
